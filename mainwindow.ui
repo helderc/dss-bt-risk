@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>DSS BT-Risk</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -153,22 +153,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="SIRLayout">
-        <property name="spacing">
-         <number>1</number>
-        </property>
-        <item>
-         <widget class="QWidget" name="simulationWidget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_4"/>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QTextEdit" name="txtEdtReport"/>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -201,11 +186,23 @@
      <x>0</x>
      <y>0</y>
      <width>1097</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="mnuExit"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="mnuExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
