@@ -3,8 +3,9 @@ import sys
 import numpy as np
 import qtmodern.styles
 import qtmodern.windows
-#from models.graph_model import GraphModel
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
+from PyQt5.QtChart import QChart, QChartView, QLineSeries, QValueAxis
 from scipy.stats import norm
 #from spatialSIR import draw_prototype
 
@@ -27,25 +28,30 @@ class MainWindow(QtWidgets.QMainWindow):
         #             "MainWindow", f"Scenario {datapoint+1}"
         #         )
         #     )
-        self.verticalLayout.addItem(
-            QtWidgets.QSpacerItem(
-                20, 40, 
-                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-            )
-        )
 
-        # Integrates SIRWidget and adds logic to begin and stop buttons
-        #self.SIRWidget = draw_prototype.SIRViewer(self.simulationWidget)
-        #self.SIRLayout.addWidget(self.SIRWidget)
-        # model = draw_prototype.SIRModel(
-        #     population=200,
-        #     recovery_rate=0.01,
-        #     mapfile="spatialSIR/mapfiles/scenario_medium.png",
-        # )
-        #self.SIRWidget.attach_model(model)
-        #self.simulationBeginButton.clicked.connect(self.SIRWidget.thread_start)
+
+        # connecting signals to slots
+        self.sldrAge.valueChanged.connect(self.SliderChanged)
+        self.actionExit.triggered.connect(self.Exit)
+        self.actionAbout.triggered.connect(self.About)
+        self.actionAbout_Qt.triggered.connect(self.AboutQt)
         #self.simulationStopButton.clicked.connect(self.SIRWidget.thread_cancel)
         # NOTE: stop button will literally just kill entire main window
+
+    def SliderChanged(self, v):
+        self.lblAge.setText(f'Age: {v}')
+
+    def About(self):
+        QMessageBox.about(self,
+                    'About...',
+                    'by Helder')
+
+    def AboutQt(self):
+        QMessageBox.aboutQt(self)
+
+    def Exit(self):
+        # QtWidgets.qApp.quit
+        self.close()
 
     def updateGraph(self):
         """Updates graph respective to status of toggled checkbox.
@@ -91,8 +97,6 @@ class MainWindow(QtWidgets.QMainWindow):
 def main():
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
-    #qtmodern.styles.
-    #qtmodern.styles.light(app)
     main = qtmodern.windows.ModernWindow(main)
     main.show()
     sys.exit(app.exec_())
