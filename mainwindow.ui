@@ -74,17 +74,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       <widget class="QChartView" name="widget" native="true"/>
       </item>
       <item>
        <widget class="QGroupBox" name="parameterGroupBox">
@@ -193,6 +183,12 @@
    <class>MplWidget</class>
    <extends>QWidget</extends>
    <header>mplwidget</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QWidget</extends>
+   <header>PyQt5.QtChart</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

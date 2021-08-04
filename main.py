@@ -29,6 +29,17 @@ class MainWindow(QtWidgets.QMainWindow):
         #         )
         #     )
 
+        chart = QChart()
+        series = QLineSeries()
+
+        series.append(1,3)
+        series.append(2,4)
+
+        chart.addSeries(series)
+        chart.setTitle('Example')
+        chart.createDefaultAxes()
+
+        self.widget.setChart(chart) 
 
         # connecting signals to slots
         self.sldrAge.valueChanged.connect(self.SliderChanged)
