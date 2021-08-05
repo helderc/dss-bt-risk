@@ -1,12 +1,16 @@
 import sys
 
 import numpy as np
+from scipy.stats import norm
+
 import qtmodern.styles
 import qtmodern.windows
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
-from PyQt5.QtChart import QChart, QChartView, QLineSeries, QValueAxis
-from scipy.stats import norm
+from PyQt5.QtChart import QChart, QChartView, QBarSet, QPercentBarSeries, QBarCategoryAxis
+from PyQt5.QtGui import QPainter
+from PyQt5.QtCore import Qt
+
 
 from bayesiannet import BayesianNet
 
@@ -32,15 +36,44 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.bnet = BayesianNet()
 
+
+        # Testing barchart
+        set0 = QBarSet("PofS")
+        set1 = QBarSet("Bob")
+        set2 = QBarSet("Tom")
+        set3 = QBarSet("Logan")
+        set4 = QBarSet("Karim")
+
+        set0 << 1 << 2 << 8 << 2 << 5 << 3#= self.bnet.doInference(self.bnet.bn, 'PofS').toarray() * 100
+        set1 << 5 << 0 << 0 << 4 << 0 << 7
+        set2 << 3 << 5 << 8 << 13 << 8 << 5
+        set3 << 5 << 6 << 7 << 3 << 4 << 5
+        set4 << 9 << 7 << 5 << 3 << 1 << 2
+
+        series = QPercentBarSeries()
+        series.append(set0)
+        series.append(set1)
+        series.append(set2)
+        series.append(set3)
+        series.append(set4)
+
         chart = QChart()
-        series = QLineSeries()
-
-        series.append(1,3)
-        series.append(2,4)
-
         chart.addSeries(series)
-        chart.setTitle('Example')
+        chart.setTitle("Percent Example")
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+
+        categories = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+        axis = QBarCategoryAxis()
+        axis.append(categories)
         chart.createDefaultAxes()
+        chart.setAxisX(axis, series)
+
+        chart.legend().setVisible(False)
+        chart.legend().setAlignment(Qt.AlignBottom)
+
+        
+        #chartView = QChartView(chart)
+        #chartView.setRenderHint(QPainter.Antialiasing)
 
         self.widget.setChart(chart) 
 

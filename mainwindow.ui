@@ -74,9 +74,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QChartView" name="widget" native="true"/>
-      </item>
-      <item>
        <widget class="QGroupBox" name="parameterGroupBox">
         <property name="font">
          <font>
@@ -120,7 +117,7 @@
        <number>7</number>
       </property>
       <item>
-       <widget class="MplWidget" name="graphWidget" native="true">
+       <widget class="QChartView" name="widget" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -142,7 +139,7 @@
      <x>0</x>
      <y>0</y>
      <width>1097</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -179,12 +176,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>MplWidget</class>
-   <extends>QWidget</extends>
-   <header>mplwidget</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>QChartView</class>
    <extends>QWidget</extends>
