@@ -260,4 +260,4 @@ class BayesianNet(object):
         ie.setEvidence(evs)
         ie.makeInference()
 
-        return ie.posterior(var_obs).toarray()
+        return ie.posterior(var_obs)#.toarray()
