@@ -7,7 +7,8 @@ from PyQt5.QtWidgets import QMessageBox
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from PyQt5.QtChart import QChart, QChartView, QLineSeries, QValueAxis
 from scipy.stats import norm
-#from spatialSIR import draw_prototype
+
+from bayesiannet import BayesianNet
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -28,6 +29,8 @@ class MainWindow(QtWidgets.QMainWindow):
         #             "MainWindow", f"Scenario {datapoint+1}"
         #         )
         #     )
+
+        self.bnet = BayesianNet()
 
         chart = QChart()
         series = QLineSeries()
@@ -64,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # QtWidgets.qApp.quit
         self.close()
 
+    # TODO: Maybe this will be necessary when plotting new graphs
     def updateGraph(self):
         """Updates graph respective to status of toggled checkbox.
 
