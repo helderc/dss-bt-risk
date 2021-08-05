@@ -238,3 +238,26 @@ class BayesianNet(object):
         ifr_tmp,_ = self.tnorm_dist(mean=0.35, std_dev=np.sqrt(0.01), bins=11)
         ifr = ifr_tmp / np.sum(ifr_tmp)
         bn.cpt('IFR')[{'COVID-19 Status': 2}] = ifr
+
+
+    def doInference(self, bn, evs, var_obs):
+        """Do inference on the Bayesian network based on the evidence set.
+        This function will return the data regarding the variable observed as NumPy array.
+
+        Parameters
+        ----------
+        bn : [type]
+            Bayesian network.
+        evs : dict
+            evidence to be set according to PyAgrum format
+        var_obs : str
+            variable observed. The variable specified will be returned by the function.
+        """
+
+        # TODO: maybe add other inference methods?
+        ie = gum.LazyPropagation(bn)
+
+        ie.setEvidence(evs)
+        ie.makeInference()
+
+        return ie.posterior(var_obs).toarray()
