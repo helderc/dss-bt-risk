@@ -7,8 +7,8 @@ import qtmodern.styles
 import qtmodern.windows
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
-from PyQt5.QtChart import QChart, QChartView, QBarSet, QPercentBarSeries, QBarCategoryAxis
-from PyQt5.QtGui import QPainter
+from PyQt5.QtChart import QChart, QChartView, QBarSet, QValueAxis, QPercentBarSeries, QBarCategoryAxis
+from PyQt5.QtGui import QPainter, QFont
 from PyQt5.QtCore import Qt
 
 
@@ -36,6 +36,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.bnet = BayesianNet()
 
+        # TODO: Automate creation/population of sets
+        sets = []
 
         # Testing barchart
         set0 = QBarSet("PofS")
@@ -44,11 +46,23 @@ class MainWindow(QtWidgets.QMainWindow):
         set3 = QBarSet("Logan")
         set4 = QBarSet("Karim")
 
-        set0 << 1 << 2 << 8 << 2 << 5 << 3#= self.bnet.doInference(self.bnet.bn, 'PofS').toarray() * 100
-        set1 << 5 << 0 << 0 << 4 << 0 << 7
-        set2 << 3 << 5 << 8 << 13 << 8 << 5
-        set3 << 5 << 6 << 7 << 3 << 4 << 5
-        set4 << 9 << 7 << 5 << 3 << 1 << 2
+
+        set0 << 8 << 55 << 0 << 0 << 0 << 0 << 0 << 0 << 0#= self.bnet.doInference(self.bnet.bn, 'PofS').toarray() * 100
+        set1 << 2 << 45 << 0 << 4 << 0 << 0 << 0 << 0 << 0
+        set2 << 0 << 0 << 8 << 13 << 8 << 0 << 0 << 0 << 0
+        set3 << 0 << 0 << 7 << 3 << 4 << 0 << 0 << 0 << 0
+        set4 << 0 << 0 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
 
         series = QPercentBarSeries()
         series.append(set0)
@@ -57,16 +71,43 @@ class MainWindow(QtWidgets.QMainWindow):
         series.append(set3)
         series.append(set4)
 
+        #series2 = QPercentBarSeries()
+        
+
         chart = QChart()
+        #chart.setTheme(QChart.ChartThemeQt)
         chart.addSeries(series)
-        chart.setTitle("Percent Example")
+        #chart.addSeries(series2)
+        chart.setTitle("DSS - Diamond Princess cruise ship")
+
+        font = QFont()
+        font.setPixelSize(14)
+        font.setBold(True)
+
+        chart.setTitleFont(font)
         chart.setAnimationOptions(QChart.SeriesAnimations)
 
-        categories = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
-        axis = QBarCategoryAxis()
-        axis.append(categories)
-        chart.createDefaultAxes()
-        chart.setAxisX(axis, series)
+        categories = ['Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 'CovS', 'TPos', 'IFR']
+        axisX = QBarCategoryAxis()
+        axisX.append(categories)
+        axisX.setLabelsAngle(-45)
+        axisX.setTitleText('Variables')
+        #chart.createDefaultAxes()
+        chart.addAxis(axisX, Qt.AlignBottom)
+        
+
+        axisY = QValueAxis()
+        axisY.setRange(0,100)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        chart.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        # TODO: Y-axis set tick interval 10
+        # TODO: Y-axis horizontal lines
 
         chart.legend().setVisible(False)
         chart.legend().setAlignment(Qt.AlignBottom)
