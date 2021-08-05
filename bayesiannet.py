@@ -240,7 +240,7 @@ class BayesianNet(object):
         bn.cpt('IFR')[{'COVID-19 Status': 2}] = ifr
 
 
-    def doInference(self, bn, evs, var_obs):
+    def doInference(self, bn, var_obs, evs={}):
         """Do inference on the Bayesian network based on the evidence set.
         This function will return the data regarding the variable observed as NumPy array.
 
