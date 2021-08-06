@@ -5,7 +5,7 @@ from scipy.stats import norm
 
 import qtmodern.styles
 import qtmodern.windows
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from PyQt5.QtChart import QChart, QChartView, QBarSet, QValueAxis, QPercentBarSeries, QBarCategoryAxis
 from PyQt5.QtGui import QPainter, QFont
@@ -15,10 +15,10 @@ from PyQt5.QtCore import Qt
 from bayesiannet import BayesianNet
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        #self._model = GraphModel()
+        
         uic.loadUi("mainwindow.ui", self)
 
         # Generate checkboxes based on length of data in model
@@ -36,6 +36,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.bnet = BayesianNet()
 
+        self.var_observe = []
+        self.var_evidences = {}
+
         # TODO: Automate creation/population of sets
         sets = []
 
@@ -47,10 +50,10 @@ class MainWindow(QtWidgets.QMainWindow):
         set4 = QBarSet("Karim")
 
 
-        set0 << 8 << 55 << 0 << 0 << 0 << 0 << 0 << 0 << 0#= self.bnet.doInference(self.bnet.bn, 'PofS').toarray() * 100
-        set1 << 2 << 45 << 0 << 4 << 0 << 0 << 0 << 0 << 0
-        set2 << 0 << 0 << 8 << 13 << 8 << 0 << 0 << 0 << 0
-        set3 << 0 << 0 << 7 << 3 << 4 << 0 << 0 << 0 << 0
+        set0 << 8 << 55 << 0 << 0 << 0 << 100 << 0 << 0 << 0#= self.bnet.doInference(self.bnet.bn, 'PofS').toarray() * 100
+        set1 << 2 << 45 << 0 << 4 << 0 << 0 << 100 << 0 << 0
+        set2 << 0 << 0 << 8 << 13 << 8 << 0 << 0 << 100 << 0
+        set3 << 0 << 0 << 7 << 3 << 4 << 0 << 0 << 0 << 100
         set4 << 0 << 0 << 5 << 3 << 1 << 0 << 0 << 0 << 0
         # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
         # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
@@ -119,15 +122,153 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget.setChart(chart) 
 
         # connecting signals to slots
-        self.sldrAge.valueChanged.connect(self.SliderChanged)
+        self.btnAnalyze.clicked.connect(self.Analyze)
+
+        self.ckbAge.stateChanged.connect(self.SetObserve)
+        self.ckbGender.stateChanged.connect(self.SetObserve)
+        self.ckbCovS.stateChanged.connect(self.SetObserve)
+
+        self.sldrAge.valueChanged.connect(self.AgeSliderChanged)
+        self.sldrCovS.valueChanged.connect(self.CovSSliderChanged)
+        self.sldrTPos.valueChanged.connect(self.TPosSliderChanged)
+        self.sldrIFR.valueChanged.connect(self.IFRSliderChanged)
+        self.sldrIPR.valueChanged.connect(self.IPRSliderChanged)
+
         self.actionExit.triggered.connect(self.Exit)
         self.actionAbout.triggered.connect(self.About)
         self.actionAbout_Qt.triggered.connect(self.AboutQt)
         #self.simulationStopButton.clicked.connect(self.SIRWidget.thread_cancel)
         # NOTE: stop button will literally just kill entire main window
 
-    def SliderChanged(self, v):
-        self.lblAge.setText(f'Age: {v}')
+    def DoReport(self, txt):
+        print(txt)
+        self.txtEdtReport.setHtml(txt)
+
+    def Analyze(self):
+        res = self.bnet.doInference(self.bnet.bn, 
+                                    var_obs=self.var_observe, 
+                                    evs=self.var_evidences)
+
+        print(res.toarray())
+        self.DoReport(str(res.toarray()))
+        
+
+
+
+    def SetObserve(self, state):
+        widget_name = self.sender().objectName()
+        var_name = widget_name.split('ckb')[1]
+
+        # FIX: avoid duplicates
+        self.var_observe.append(var_name)
+        if var_name in self.var_observe and state == 0:
+            self.var_observe.remove(var_name)
+        elif var_name not in self.var_observe and state == 1:
+            self.var_observe.append(var_name)
+
+        print('Observe:', self.var_observe)
+        # remove from dict:
+        # self.var_evidences.pop('Age')
+
+    
+
+    def AgeSliderChanged(self, v):
+        age_states = {-1: 'unset',
+                      0: '0-9',
+                      1: '10-19',
+                      2: '20-29',
+                      3: '30-39',
+                      4: '40-49',
+                      5: '50-59',
+                      6: '60-69',
+                      7: '70-79',
+                      8: '80-89',
+                      9: '90-99'}
+
+        lblText = f'Age: {age_states[v]}'
+        if v != -1:
+            lblText = f'<b>Age: <font color="red">{age_states[v]}</font></b>'
+
+        self.lblAge.setText(lblText)
+
+
+    def CovSSliderChanged(self, v):
+        covs_states = {-1: 'unset',
+                      0: 'Infected w/ Symp.',
+                      1: 'Infected w/o Symp.',
+                      2: 'Not Infected'}
+
+        # unset situation
+        lblText = f'Covid-19 Status (CovS): {covs_states[v]}'
+        if 'COVID-19 Status' in self.var_evidences:
+            del self.var_evidences['COVID-19 Status']
+        # diff from unset
+        if v != -1:
+            lblText = f'<b>Covid-19 Status (CovS): <font color="red">{covs_states[v]}</font></b>'
+            self.var_evidences['COVID-19 Status'] = v
+
+        print('CovS', v)
+        self.lblCovS.setText(lblText)
+
+
+    def TPosSliderChanged(self, v):
+        tpos_states = {-1: 'unset',
+                      0: 'No',
+                      1: 'Yes'}
+
+        lblText = f'Tested Positive (TPos): {tpos_states[v]}'
+        if v != -1:
+            lblText = f'<b>Tested Positive (TPos):<font color="red"> {tpos_states[v]}</font></b>'
+
+        self.lblTPos.setText(lblText)
+
+
+    def IFRSliderChanged(self, v):
+        ifr_states = {-1: 'unset',
+                       0: '0.0%',
+                       1: '0.1%', 
+                       2: '0.2%', 
+                       3: '0.3%', 
+                       4: '0.4%', 
+                       5: '0.5%', 
+                       6: '0.6%', 
+                       7: '0.7%', 
+                       8: '0.8%', 
+                       9: '0.9%', 
+                       10: '1.0%', 
+                       }
+
+        lblText = f'Infection Fatality Rate (IFR): {ifr_states[v]}'
+        if v != -1:
+            lblText = f'<b>Infection Fatality Rate (IFR):<font color="red"> {ifr_states[v]}</font></b>'
+
+        self.lblIFR.setText(lblText)
+        
+
+    def IPRSliderChanged(self, v):
+        #'<=13%|14%|15%|16%|17%|18%|19%|20%|21%|22%|23%|24%|>=25%'
+
+        ipr_states = {-1: 'unset',
+                       0: ']13%',
+                       1: '14%', 
+                       2: '15%', 
+                       3: '16%', 
+                       4: '17%', 
+                       5: '18%', 
+                       6: '19%', 
+                       7: '20%', 
+                       8: '21%', 
+                       9: '22%', 
+                       10: '23%',
+                       11: '24%',
+                       12: '>=25%'}
+
+        lblText = f'Infection Prevalence Rate (IPR): {ipr_states[v]}'
+        if v != -1:
+            lblText = f'<b>Infection Prevalence Rate (IPR):<font color="red"> {ipr_states[v]}</font></b>'
+
+        self.lblIPR.setText(lblText)
+
 
     def About(self):
         QMessageBox.about(self,
@@ -184,7 +325,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     main = MainWindow()
     main = qtmodern.windows.ModernWindow(main)
     main.show()
