@@ -32,6 +32,21 @@ class MainWindow(QMainWindow):
         #         )
         #     )
 
+        # total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
+        self.age_states = {-1: ['unset'],
+                            0: ['0-9', 16],
+                            1: ['10-19', 23],
+                            2: ['20-29', 347],
+                            3: ['30-39', 428],
+                            4: ['40-49', 334],
+                            5: ['50-59', 398],
+                            6: ['60-69', 923],
+                            7: ['70-79', 1015],
+                            8: ['80-89', 216],
+                            9: ['90-99', 11]}
+
+
+
         self.bnet = BayesianNet()
 
         self.var_observe = []
@@ -128,9 +143,9 @@ class MainWindow(QMainWindow):
         self.series = QHorizontalPercentBarSeries()
         self.series.setLabelsVisible(False)
 
-        for a in total_age:
-            setAge = QBarSet('')
-            setAge.append(a)
+        for k,v in enumerate(total_age):
+            setAge = QBarSet(self.age_states[k][0])
+            setAge.append(v)
             self.series.append(setAge)
 
         chart = QChart()
@@ -222,8 +237,10 @@ class MainWindow(QMainWindow):
 
     def MouseOnBar(self, status, index, barset):
         if status:
-            #print(barset[index])
-            self.statusbar.showMessage('Value: {:.2f}'.format(barset[index]))
+            #print(index, barset.label(), barset[index])
+            txt = '{} / {:.1f}%'.format(barset.label(),barset[index])
+            self.statusbar.showMessage(txt)
+            self.setToolTip(txt)
 
 
     def SetObserve(self, state):
@@ -248,25 +265,12 @@ class MainWindow(QMainWindow):
     
 
     def AgeSliderChanged(self, v):
-        # total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
-        age_states = {-1: ['unset'],
-                      0: ['0-9', 16],
-                      1: ['10-19', 23],
-                      2: ['20-29', 347],
-                      3: ['30-39', 428],
-                      4: ['40-49', 334],
-                      5: ['50-59', 398],
-                      6: ['60-69', 923],
-                      7: ['70-79', 1015],
-                      8: ['80-89', 216],
-                      9: ['90-99', 11]}
-
-        lblText = f'Age: {age_states[v][0]}'
+        lblText = f'Age: {self.age_states[v][0]}'
         if v != -1:
-            lblText = '<b>Age: <font color="red">{} ({} people - {:.1f}%)</font></b>'.format(
-                                                                age_states[v][0], 
-                                                                age_states[v][1],
-                                                                age_states[v][1]/3711*100)
+            lblText = '<b>Age: <font color="red">{} ({} people / {:.1f}%)</font></b>'.format(
+                                                                self.age_states[v][0], 
+                                                                self.age_states[v][1],
+                                                                self.age_states[v][1]/3711*100)
 
         self.lblAge.setText(lblText)
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>955</width>
-    <height>711</height>
+    <height>946</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -87,6 +87,21 @@
            <string>Evidences</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
+           <property name="spacing">
+            <number>2</number>
+           </property>
+           <property name="leftMargin">
+            <number>2</number>
+           </property>
+           <property name="topMargin">
+            <number>2</number>
+           </property>
+           <property name="rightMargin">
+            <number>2</number>
+           </property>
+           <property name="bottomMargin">
+            <number>2</number>
+           </property>
            <item>
             <widget class="QLabel" name="lblAge">
              <property name="font">
@@ -99,6 +114,22 @@
              </property>
              <property name="text">
               <string>Age: unset</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QChartView" name="plotAge" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -328,7 +359,7 @@
            </font>
           </property>
           <property name="title">
-           <string>Observe</string>
+           <string>Calculate Risk</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
@@ -395,6 +426,9 @@
            </item>
            <item>
             <widget class="QCheckBox" name="ckbCovS">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="font">
               <font>
                <pointsize>12</pointsize>
@@ -443,6 +477,9 @@
            </item>
            <item>
             <widget class="QCheckBox" name="ckbTPos">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="font">
               <font>
                <pointsize>12</pointsize>
@@ -457,6 +494,9 @@
            </item>
            <item>
             <widget class="QCheckBox" name="ckbIFR">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="font">
               <font>
                <pointsize>12</pointsize>
@@ -542,7 +582,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>955</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
