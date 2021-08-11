@@ -13,7 +13,6 @@ Created on:   2021/08/03 20:22:34
 '''
  
 import pyAgrum as gum
-import pyAgrum.lib.notebook as gnb
 import random
 import pandas as pd
 import numpy as np
@@ -260,4 +259,9 @@ class BayesianNet(object):
         ie.setEvidence(evs)
         ie.makeInference()
 
-        return ie.posterior(var_obs)#.toarray()
+        # TODO: what if more than one var_obs????
+        all_vars = {}
+        for v in var_obs:
+            all_vars[v] = ie.posterior(v).toarray()
+
+        return all_vars

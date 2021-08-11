@@ -3,14 +3,12 @@ import sys
 import numpy as np
 from scipy.stats import norm
 
-import qtmodern.styles
 import qtmodern.windows
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QToolTip
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
-from PyQt5.QtChart import QChart, QChartView, QBarSet, QValueAxis, QPercentBarSeries, QBarCategoryAxis
+from PyQt5.QtChart import QChart, QChartView, QBarSet, QValueAxis, QPercentBarSeries, QBarCategoryAxis, QBarSeries, QHorizontalPercentBarSeries
 from PyQt5.QtGui import QPainter, QFont
 from PyQt5.QtCore import Qt
-
 
 from bayesiannet import BayesianNet
 
@@ -121,8 +119,63 @@ class MainWindow(QMainWindow):
 
         self.widget.setChart(chart) 
 
+
+        # TODO: age plot
+        total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
+        total_age = np.divide(total_age, np.sum(total_age)) * 100
+        print(total_age)
+
+        self.series = QHorizontalPercentBarSeries()
+        self.series.setLabelsVisible(False)
+
+        for a in total_age:
+            setAge = QBarSet('')
+            setAge.append(a)
+            self.series.append(setAge)
+
+        chart = QChart()
+        #chart.setTheme(QChart.ChartThemeQt)
+        chart.addSeries(self.series)
+        self.series.setLabelsVisible(False)
+        #chart.addSeries(series2)
+        #chart.setTitle("DSS - Diamond Princess cruise ship")
+
+        #font = QFont()
+       # font.setPixelSize(14)
+        #font.setBold(True)
+        #chart.setTitleFont(font)
+        #chart.setAnimationOptions(QChart.SeriesAnimations)
+
+        # categories = ['Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 'CovS', 'TPos', 'IFR']
+        # axisX = QBarCategoryAxis()
+        # axisX.append(categories)
+        # axisX.setTitleText('Variables')
+        # axisX.setVisible(False)
+        # chart.createDefaultAxes()
+        # chart.addAxis(axisX, Qt.AlignBottom)
+
+        # TODO: Y-axis set tick interval 10
+        # TODO: Y-axis horizontal lines
+
+        chart.legend().setVisible(False)
+        #chart.legend().setAlignment(Qt.AlignBottom)
+
+        
+        #chartView = QChartView(chart)
+        #chartView.setRenderHint(QPainter.Antialiasing)
+        self.plotAge.setChart(chart) 
+
+
+
+
+
+
+
         # connecting signals to slots
         self.btnAnalyze.clicked.connect(self.Analyze)
+        #self.btnReset.clicked.connect(self.Reset)
+
+        self.series.hovered.connect(self.MouseOnBar)
 
         self.ckbAge.stateChanged.connect(self.SetObserve)
         self.ckbGender.stateChanged.connect(self.SetObserve)
@@ -137,33 +190,55 @@ class MainWindow(QMainWindow):
         self.actionExit.triggered.connect(self.Exit)
         self.actionAbout.triggered.connect(self.About)
         self.actionAbout_Qt.triggered.connect(self.AboutQt)
-        #self.simulationStopButton.clicked.connect(self.SIRWidget.thread_cancel)
-        # NOTE: stop button will literally just kill entire main window
+
+    def ResetSetup(self):
+        # reset interface and variables
+        print('--> Reset')
 
     def DoReport(self, txt):
+        txt = '<b>Date</b>: February, 2020.<br><br>' +\
+              '<b>Subject</b>: Diamond Princess cruise ship.<br>' +\
+              '<b>Warning level</b>: <i><font color="red">Low</font></i>.<br>' +\
+              '<b>Specification</b>: The risk of false-positive ' +\
+              'outcomes in testing is moderately <i><font color="red">low</font></i>.<br>'
         print(txt)
+        self.txtEdtReport.clear()
         self.txtEdtReport.setHtml(txt)
+
 
     def Analyze(self):
         res = self.bnet.doInference(self.bnet.bn, 
                                     var_obs=self.var_observe, 
                                     evs=self.var_evidences)
+        print(res)
 
-        print(res.toarray())
-        self.DoReport(str(res.toarray()))
-        
+        report_str = ''
+        for k in res:
+            print(k, res[k])
+            report_str += '<b><font color="red">' + k +\
+                          '</font></b>:<br>' + str(res[k]) + '<br><br>' 
+        self.DoReport(report_str)
 
+
+    def MouseOnBar(self, status, index, barset):
+        if status:
+            #print(barset[index])
+            self.statusbar.showMessage('Value: {:.2f}'.format(barset[index]))
 
 
     def SetObserve(self, state):
         widget_name = self.sender().objectName()
         var_name = widget_name.split('ckb')[1]
 
+        # if var_name == 'CovS':
+        #     var_name = ''
+
         # FIX: avoid duplicates
-        self.var_observe.append(var_name)
+
+        # add/remove itens from the list as necessary
         if var_name in self.var_observe and state == 0:
             self.var_observe.remove(var_name)
-        elif var_name not in self.var_observe and state == 1:
+        elif var_name not in self.var_observe and state == 2:
             self.var_observe.append(var_name)
 
         print('Observe:', self.var_observe)
@@ -173,21 +248,25 @@ class MainWindow(QMainWindow):
     
 
     def AgeSliderChanged(self, v):
-        age_states = {-1: 'unset',
-                      0: '0-9',
-                      1: '10-19',
-                      2: '20-29',
-                      3: '30-39',
-                      4: '40-49',
-                      5: '50-59',
-                      6: '60-69',
-                      7: '70-79',
-                      8: '80-89',
-                      9: '90-99'}
+        # total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
+        age_states = {-1: ['unset'],
+                      0: ['0-9', 16],
+                      1: ['10-19', 23],
+                      2: ['20-29', 347],
+                      3: ['30-39', 428],
+                      4: ['40-49', 334],
+                      5: ['50-59', 398],
+                      6: ['60-69', 923],
+                      7: ['70-79', 1015],
+                      8: ['80-89', 216],
+                      9: ['90-99', 11]}
 
-        lblText = f'Age: {age_states[v]}'
+        lblText = f'Age: {age_states[v][0]}'
         if v != -1:
-            lblText = f'<b>Age: <font color="red">{age_states[v]}</font></b>'
+            lblText = '<b>Age: <font color="red">{} ({} people - {:.1f}%)</font></b>'.format(
+                                                                age_states[v][0], 
+                                                                age_states[v][1],
+                                                                age_states[v][1]/3711*100)
 
         self.lblAge.setText(lblText)
 
