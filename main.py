@@ -32,6 +32,8 @@ class MainWindow(QMainWindow):
         #         )
         #     )
 
+        # Data considered
+        self.total_population = 3711
         # total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
         self.age_states = {-1: ['unset'],
                             0: ['0-9', 16],
@@ -44,6 +46,35 @@ class MainWindow(QMainWindow):
                             7: ['70-79', 1015],
                             8: ['80-89', 216],
                             9: ['90-99', 11]}
+
+        #'<=13%|14%|15%|16%|17%|18%|19%|20%|21%|22%|23%|24%|>=25%'
+        self.ipr_states = {-1: 'unset',
+                            0: ['\u2264 13%', 0.13],
+                            1: ['14%', 0.14], 
+                            2: ['15%', 0.15], 
+                            3: ['16%', 0.16],
+                            4: ['17%', 0.17], 
+                            5: ['18%', 0.18], 
+                            6: ['19%', 0.19], 
+                            7: ['20%', 0.20], 
+                            8: ['21%', 0.21], 
+                            9: ['22%', 0.22], 
+                            10: ['23%', 0.23],
+                            11: ['24%', 0.24],
+                            12: ['\u2265 25%', 0.25]}
+
+        self.ifr_states = {-1: 'unset',
+                           0: ['0.0%', 0],
+                           1: ['0.1%', 0.001], 
+                           2: ['0.2%', 0.002], 
+                           3: ['0.3%', 0.003], 
+                           4: ['0.4%', 0.004], 
+                           5: ['0.5%', 0.005], 
+                           6: ['0.6%', 0.006], 
+                           7: ['0.7%', 0.007], 
+                           8: ['0.8%', 0.008], 
+                           9: ['0.9%', 0.009], 
+                           10: ['1.0%', 0.01]}
 
 
 
@@ -136,6 +167,7 @@ class MainWindow(QMainWindow):
 
 
         # TODO: age plot
+        # FIX: use the self.age_states
         total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
         total_age = np.divide(total_age, np.sum(total_age)) * 100
         print(total_age)
@@ -211,14 +243,15 @@ class MainWindow(QMainWindow):
         print('--> Reset')
 
     def DoReport(self, txt):
-        txt = '<b>Date</b>: February, 2020.<br><br>' +\
+        txt2 = '<b>Date</b>: February, 2020.<br><br>' +\
               '<b>Subject</b>: Diamond Princess cruise ship.<br>' +\
               '<b>Warning level</b>: <i><font color="red">Low</font></i>.<br>' +\
               '<b>Specification</b>: The risk of false-positive ' +\
               'outcomes in testing is moderately <i><font color="red">low</font></i>.<br>'
-        print(txt)
+        #print(txt)
+        txt_final = txt2 + '<hr><br>' + txt
         self.txtEdtReport.clear()
-        self.txtEdtReport.setHtml(txt)
+        self.txtEdtReport.setHtml(txt_final)
 
 
     def Analyze(self):
@@ -240,7 +273,7 @@ class MainWindow(QMainWindow):
             #print(index, barset.label(), barset[index])
             txt = '{} / {:.1f}%'.format(barset.label(),barset[index])
             self.statusbar.showMessage(txt)
-            self.setToolTip(txt)
+            self.plotAge.setToolTip(txt)
 
 
     def SetObserve(self, state):
@@ -271,7 +304,6 @@ class MainWindow(QMainWindow):
                                                                 self.age_states[v][0], 
                                                                 self.age_states[v][1],
                                                                 self.age_states[v][1]/3711*100)
-
         self.lblAge.setText(lblText)
 
 
@@ -307,48 +339,25 @@ class MainWindow(QMainWindow):
 
 
     def IFRSliderChanged(self, v):
-        ifr_states = {-1: 'unset',
-                       0: '0.0%',
-                       1: '0.1%', 
-                       2: '0.2%', 
-                       3: '0.3%', 
-                       4: '0.4%', 
-                       5: '0.5%', 
-                       6: '0.6%', 
-                       7: '0.7%', 
-                       8: '0.8%', 
-                       9: '0.9%', 
-                       10: '1.0%', 
-                       }
-
-        lblText = f'Infection Fatality Rate (IFR): {ifr_states[v]}'
+        lblText = f'Infection Fatality Rate (IFR): {self.ifr_states[v][0]}'
         if v != -1:
-            lblText = f'<b>Infection Fatality Rate (IFR):<font color="red"> {ifr_states[v]}</font></b>'
-
+            qtt_fatality = int(self.ifr_states[v][1] * self.total_population)
+            lblText = '<b>Infection Fatality Rate (IFR):<font color="red"> ' +\
+                      '{} / {:d} people</font></b>'.format(
+                                                        self.ifr_states[v][0],
+                                                        qtt_fatality)
         self.lblIFR.setText(lblText)
         
 
     def IPRSliderChanged(self, v):
-        #'<=13%|14%|15%|16%|17%|18%|19%|20%|21%|22%|23%|24%|>=25%'
-
-        ipr_states = {-1: 'unset',
-                       0: ']13%',
-                       1: '14%', 
-                       2: '15%', 
-                       3: '16%', 
-                       4: '17%', 
-                       5: '18%', 
-                       6: '19%', 
-                       7: '20%', 
-                       8: '21%', 
-                       9: '22%', 
-                       10: '23%',
-                       11: '24%',
-                       12: '>=25%'}
-
-        lblText = f'Infection Prevalence Rate (IPR): {ipr_states[v]}'
+        lblText = f'Infection Prevalence Rate (IPR): {self.ipr_states[v][0]}'
         if v != -1:
-            lblText = f'<b>Infection Prevalence Rate (IPR):<font color="red"> {ipr_states[v]}</font></b>'
+            qtt_infected = int(self.ipr_states[v][1] * self.total_population)
+            
+            lblText = '<b>Infection Prevalence Rate (IPR):<font color="red">' +\
+                      ' {} / {:d} people</font></b>'.format(
+                                                        self.ipr_states[v][0], 
+                                                        qtt_infected)
 
         self.lblIPR.setText(lblText)
 
