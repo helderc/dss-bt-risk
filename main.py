@@ -86,37 +86,46 @@ class MainWindow(QMainWindow):
         # TODO: Automate creation/population of sets
         sets = []
 
-        # Testing barchart
-        set0 = QBarSet("PofS")
-        set1 = QBarSet("Bob")
-        set2 = QBarSet("Tom")
-        set3 = QBarSet("Logan")
-        set4 = QBarSet("Karim")
 
+        # TODO: automate the plot creations
+        data_cat = ['Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 'CovS', 'TPos', 'IFR']        
+        # the quantity of sets = max(quantity of variables values)
+        # quantity of values in each set = quantity of variables
+        #= self.bnet.doInference(self.bnet.bn, 'PofS').toarray() * 100
 
-        set0 << 8 << 55 << 0 << 0 << 0 << 100 << 0 << 0 << 0#= self.bnet.doInference(self.bnet.bn, 'PofS').toarray() * 100
-        set1 << 2 << 45 << 0 << 4 << 0 << 0 << 100 << 0 << 0
-        set2 << 0 << 0 << 8 << 13 << 8 << 0 << 0 << 100 << 0
-        set3 << 0 << 0 << 7 << 3 << 4 << 0 << 0 << 0 << 100
-        set4 << 0 << 0 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
-        # set4 << 0 << 7 << 5 << 3 << 1 << 0 << 0 << 0 << 0
+        # Organization by column:
+        # 'Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 'CovS', 'TPos', 'IFR'
+        # values in %
+        vars_values = [
+            [0.0043, 0.45, 0.54, 0.00000000,     0.00000, 0.0000e+00, 0.08584559, 0.85189975, 0.00745049],
+            [0.0062, 0.55, 0.46, 0.00003596,     0.00000, 1.5000e-04, 0.09385208, 0.14810025, 0.04381822],
+            [0.0933, 0,    0,    1.01815092e-02, 0.00000, 3.0700e-03, 0.82030234, 0,          0.16182437],
+            [0.1151, 0,    0,    2.78046396e-03, 0.00004, 3.0730e-02, 0,          0,          0.30627996],
+            [0.0898, 0,    0,    1.12610530e-02, 0.00087, 1.4692e-01, 0,          0,          0.28288477],
+            [0.1071, 0,    0,    2.61876322e-02, 0.00549, 3.1922e-01, 0,          0,          0.13483421],
+            [0.2490, 0,    0,    8.98448292e-01, 0.02719, 3.1805e-01, 0,          0,          0.04193988],
+            [0.2740, 0,    0,    2.62433111e-02, 0.08864, 1.4792e-01, 0,          0,          0.01408657],
+            [0.0581, 0,    0,    1.13294917e-02, 0.18668, 3.0510e-02, 0,          0,          0.00501753],
+            [0.0029, 0,    0,    2.76422429e-03, 0.25495, 3.2700e-03, 0,          0,          0.00146225],
+            [0.0,    0,    0,    1.07367436e-02, 0.23243, 1.5000e-04, 0,          0,          0.00040176],
+            [0.0,    0,    0,    2.78394389e-05, 0.13685, 1.0000e-05, 0,          0,          0],
+            [0.0,    0,    0,    3.47992986e-06, 0.05174, 0,          0,          0,          0],
+            [0.0,    0,    0,    0,              0.01264, 0,          0,          0,          0],
+            [0.0,    0,    0,    0,              0.00245, 0,          0,          0,          0]]
 
         series = QPercentBarSeries()
-        series.append(set0)
-        series.append(set1)
-        series.append(set2)
-        series.append(set3)
-        series.append(set4)
+        test = []
+        for s in vars_values:
+            setI = QBarSet('')
+            #print(s[0], s[1] * 100)
+            print(np.multiply(s[4], 100))
+            test.append(round(np.multiply(s[4], 100)))
+
+            setI.append(np.round(np.multiply(s, 100)))
+            series.append(setI)
+
+        print(np.sum(test))
+
 
         #series2 = QPercentBarSeries()
         
@@ -170,7 +179,6 @@ class MainWindow(QMainWindow):
         # FIX: use the self.age_states
         total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
         total_age = np.divide(total_age, np.sum(total_age)) * 100
-        print(total_age)
 
         self.series = QHorizontalPercentBarSeries()
         self.series.setLabelsVisible(False)
@@ -210,7 +218,7 @@ class MainWindow(QMainWindow):
         
         #chartView = QChartView(chart)
         #chartView.setRenderHint(QPainter.Antialiasing)
-        self.plotAge.setChart(chart) 
+        #self.plotAge.setChart(chart) 
 
 
 
