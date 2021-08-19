@@ -4,10 +4,12 @@ import numpy as np
 from scipy.stats import norm
 
 import qtmodern.windows
+import qtmodern.styles
+
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QToolTip
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from PyQt5.QtChart import QChart, QChartView, QBarSet, QValueAxis, QPercentBarSeries, QBarCategoryAxis, QBarSeries, QHorizontalPercentBarSeries
-from PyQt5.QtGui import QPainter, QFont
+from PyQt5.QtGui import QPainter, QFont, QColor
 from PyQt5.QtCore import Qt
 
 from bayesiannet import BayesianNet
@@ -94,37 +96,54 @@ class MainWindow(QMainWindow):
         #= self.bnet.doInference(self.bnet.bn, 'PofS').toarray() * 100
 
         # Organization by column:
-        # 'Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 'CovS', 'TPos', 'IFR'
+        # 0: 'Age', 1: 'Gender', 2: 'PofS', 3: 'IPR', 
+        # 4: 'FNR', 5: 'FPR', 6: 'CovS', 7: 'TPos', 8: 'IFR'
         # values in %
         vars_values = [
-            [0.0043, 0.45, 0.54, 0.00000000,     0.00000, 0.0000e+00, 0.08584559, 0.85189975, 0.00745049],
-            [0.0062, 0.55, 0.46, 0.00003596,     0.00000, 1.5000e-04, 0.09385208, 0.14810025, 0.04381822],
-            [0.0933, 0,    0,    1.01815092e-02, 0.00000, 3.0700e-03, 0.82030234, 0,          0.16182437],
-            [0.1151, 0,    0,    2.78046396e-03, 0.00004, 3.0730e-02, 0,          0,          0.30627996],
-            [0.0898, 0,    0,    1.12610530e-02, 0.00087, 1.4692e-01, 0,          0,          0.28288477],
-            [0.1071, 0,    0,    2.61876322e-02, 0.00549, 3.1922e-01, 0,          0,          0.13483421],
-            [0.2490, 0,    0,    8.98448292e-01, 0.02719, 3.1805e-01, 0,          0,          0.04193988],
-            [0.2740, 0,    0,    2.62433111e-02, 0.08864, 1.4792e-01, 0,          0,          0.01408657],
-            [0.0581, 0,    0,    1.13294917e-02, 0.18668, 3.0510e-02, 0,          0,          0.00501753],
-            [0.0029, 0,    0,    2.76422429e-03, 0.25495, 3.2700e-03, 0,          0,          0.00146225],
-            [0.0,    0,    0,    1.07367436e-02, 0.23243, 1.5000e-04, 0,          0,          0.00040176],
-            [0.0,    0,    0,    2.78394389e-05, 0.13685, 1.0000e-05, 0,          0,          0],
-            [0.0,    0,    0,    3.47992986e-06, 0.05174, 0,          0,          0,          0],
-            [0.0,    0,    0,    0,              0.01264, 0,          0,          0,          0],
-            [0.0,    0,    0,    0,              0.00245, 0,          0,          0,          0]]
+            [0.0043, 0.45, 0.54, 0.00000000, 0.000, 0.0000e+00, 0.08584559, 0.85189975, 0.00745049],
+            [0.0062, 0.55, 0.46, 0.00003596, 0.000, 1.5000e-04, 0.09385208, 0.14810025, 0.04381822],
+            [0.0933, 0.0,  0.0,  0.01018150, 0.000, 3.0700e-03, 0.82030234, 0,          0.16182437],
+            [0.1151, 0.0,  0.0,  0.00278046, 0.001, 3.0730e-02, 0,          0,          0.30627996],
+            [0.0898, 0.0,  0.0,  0.01126105, 0.00037, 1.4692e-01, 0,          0,          0.28288477],
+            [0.1071, 0.0,  0.0,  0.02618763, 0.00549, 3.1922e-01, 0,          0,          0.13483421],
+            [0.2490, 0.0,  0.0,  0.89844829, 0.02719, 3.1805e-01, 0,          0,          0.04193988],
+            [0.2740, 0.0,  0.0,  0.02624331, 0.08864, 1.4792e-01, 0,          0,          0.01408657],
+            [0.0581, 0.0,  0.0,  0.01132949, 0.18668, 3.0510e-02, 0,          0,          0.00501753],
+            [0.0029, 0.0,  0.0,  0.00276422, 0.25495, 3.2700e-03, 0,          0,          0.00146225],
+            [0.0,    0.0,  0.0,  0.01073674, 0.23243, 1.5000e-04, 0,          0,          0.00040176],
+            [0.0,    0.0,  0.0,  0.00002783, 0.13685, 1.0000e-05, 0,          0,          0],
+            [0.0,    0.0,  0.0,  0.00000347, 0.05174, 0,          0,          0,          0],
+            [0.0,    0.0,  0.0,    0.0,      0.01264, 0,          0,          0,          0],
+            [0.0,    0.0,  0.0,    0.0,      0.00245, 0.0,          0.0,          0.0,          0.0]]
+        
+        vars_values = np.matrix(data=vars_values, dtype=np.float64)
+
+        # the default color palette is not enough, so I defined my own with 20 colors
+        colors = ['#C977D9', '#A18AE6', '#8AA2E6', '#8BD1E7', '#8AF3CF', 
+                  '#85F38E', '#BDF385', '#EDE485', '#F0B086', '#DE9F8B', 
+                  '#74A3B3', '#99CC70', '#DCD68E', '#EDDFAD', '#F7E8CA', 
+                  '#FFF9F3', '#FFF9F6', '#FFFBF9', '#FFFCFA', '#FFFEFD']
+
 
         series = QPercentBarSeries()
-        test = []
-        for s in vars_values:
-            setI = QBarSet('')
+        #test = []
+        for k,s in enumerate(vars_values):
+            #print(k, len(s))
+            setI = QBarSet('{}'.format(k))
+            setI.setColor(QColor(colors[k]))
             #print(s[0], s[1] * 100)
-            print(np.multiply(s[4], 100))
-            test.append(round(np.multiply(s[4], 100)))
+            #print(s[0,4] * 100)
+            #test.append(s[0,4] * 100)
 
-            setI.append(np.round(np.multiply(s, 100)))
+            values = (s[0] * 100).tolist()[0]
+            setI.append(values)
             series.append(setI)
 
-        print(np.sum(test))
+        #print(np.sum(test))
+
+        #setI = QBarSet('s')
+        #setI << 0.0 << 0.0 << 0.0 << 0.004 << 0.087 << 0.55 << 2.72 << 8.86 << 18.67 << 25.495 << 23.243 << 13.685 << 5.174 << 1.264 << 0.245    
+        #:insert(int index, QBarSet *set)
 
 
         #series2 = QPercentBarSeries()
@@ -148,6 +167,7 @@ class MainWindow(QMainWindow):
         axisX.append(categories)
         axisX.setLabelsAngle(-45)
         axisX.setTitleText('Variables')
+        
         #chart.createDefaultAxes()
         chart.addAxis(axisX, Qt.AlignBottom)
         
@@ -175,62 +195,12 @@ class MainWindow(QMainWindow):
         self.widget.setChart(chart) 
 
 
-        # TODO: age plot
-        # FIX: use the self.age_states
-        total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
-        total_age = np.divide(total_age, np.sum(total_age)) * 100
-
-        self.series = QHorizontalPercentBarSeries()
-        self.series.setLabelsVisible(False)
-
-        for k,v in enumerate(total_age):
-            setAge = QBarSet(self.age_states[k][0])
-            setAge.append(v)
-            self.series.append(setAge)
-
-        chart = QChart()
-        #chart.setTheme(QChart.ChartThemeQt)
-        chart.addSeries(self.series)
-        self.series.setLabelsVisible(False)
-        #chart.addSeries(series2)
-        #chart.setTitle("DSS - Diamond Princess cruise ship")
-
-        #font = QFont()
-       # font.setPixelSize(14)
-        #font.setBold(True)
-        #chart.setTitleFont(font)
-        #chart.setAnimationOptions(QChart.SeriesAnimations)
-
-        # categories = ['Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 'CovS', 'TPos', 'IFR']
-        # axisX = QBarCategoryAxis()
-        # axisX.append(categories)
-        # axisX.setTitleText('Variables')
-        # axisX.setVisible(False)
-        # chart.createDefaultAxes()
-        # chart.addAxis(axisX, Qt.AlignBottom)
-
-        # TODO: Y-axis set tick interval 10
-        # TODO: Y-axis horizontal lines
-
-        chart.legend().setVisible(False)
-        #chart.legend().setAlignment(Qt.AlignBottom)
-
-        
-        #chartView = QChartView(chart)
-        #chartView.setRenderHint(QPainter.Antialiasing)
-        #self.plotAge.setChart(chart) 
-
-
-
-
-
-
-
         # connecting signals to slots
         self.btnAnalyze.clicked.connect(self.Analyze)
         #self.btnReset.clicked.connect(self.Reset)
 
-        self.series.hovered.connect(self.MouseOnBar)
+        # TODO: to be used for tooltips
+        #self.series.hovered.connect(self.MouseOnBar)
 
         self.ckbAge.stateChanged.connect(self.SetObserve)
         self.ckbGender.stateChanged.connect(self.SetObserve)
@@ -252,12 +222,15 @@ class MainWindow(QMainWindow):
 
     def DoReport(self, txt):
         txt2 = '<b>Date</b>: February, 2020.<br><br>' +\
-              '<b>Subject</b>: Diamond Princess cruise ship.<br>' +\
-              '<b>Warning level</b>: <i><font color="red">Low</font></i>.<br>' +\
-              '<b>Specification</b>: The risk of false-positive ' +\
-              'outcomes in testing is moderately <i><font color="red">low</font></i>.<br>'
+              '<b><u>Subject</u></b>: Diamond Princess cruise ship.<br>' +\
+              '<b><u>Warning level</u></b>: <i><font color="red">Low</font></i>.<br>' +\
+              '<b><u>Specification</u></b>: The risk of false-positive ' +\
+              'outcomes in testing is moderately <i><font color="red">low</font></i>.'
         #print(txt)
-        txt_final = txt2 + '<hr><br>' + txt
+        txt_reasoning = '<u>Reasoning</u>:<br>' +\
+                        'P(TPos = yes IF<br>&nbsp;&nbsp;' +\
+                        'CovS = Not Infected) = <i><font color="red">14.46%</b></font></i>.'
+        txt_final = txt2 + '<hr>' + txt_reasoning + txt
         self.txtEdtReport.clear()
         self.txtEdtReport.setHtml(txt_final)
 
@@ -308,10 +281,10 @@ class MainWindow(QMainWindow):
     def AgeSliderChanged(self, v):
         lblText = f'Age: {self.age_states[v][0]}'
         if v != -1:
-            lblText = '<b>Age: <font color="red">{} ({} people / {:.1f}%)</font></b>'.format(
+            lblText = '<b>Age: <font color="red">{} ({:.1f}%, {} people)</font></b>'.format(
                                                                 self.age_states[v][0], 
-                                                                self.age_states[v][1],
-                                                                self.age_states[v][1]/3711*100)
+                                                                self.age_states[v][1]/3711*100,
+                                                                self.age_states[v][1])
         self.lblAge.setText(lblText)
 
 
@@ -351,7 +324,7 @@ class MainWindow(QMainWindow):
         if v != -1:
             qtt_fatality = int(self.ifr_states[v][1] * self.total_population)
             lblText = '<b>Infection Fatality Rate (IFR):<font color="red"> ' +\
-                      '{} / {:d} people</font></b>'.format(
+                      '{}, {:d} people</font></b>'.format(
                                                         self.ifr_states[v][0],
                                                         qtt_fatality)
         self.lblIFR.setText(lblText)
@@ -363,7 +336,7 @@ class MainWindow(QMainWindow):
             qtt_infected = int(self.ipr_states[v][1] * self.total_population)
             
             lblText = '<b>Infection Prevalence Rate (IPR):<font color="red">' +\
-                      ' {} / {:d} people</font></b>'.format(
+                      ' {}, {:d} people</font></b>'.format(
                                                         self.ipr_states[v][0], 
                                                         qtt_infected)
 
@@ -426,8 +399,8 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    main = MainWindow()
-    main = qtmodern.windows.ModernWindow(main)
+    #qtmodern.styles.light(app)
+    main = qtmodern.windows.ModernWindow(MainWindow())
     main.show()
     sys.exit(app.exec_())
 
