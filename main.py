@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         
-        uic.loadUi("mainwindow.ui", self)
+        uic.loadUi("mainwindow-temp.ui", self)
 
         # Generate checkboxes based on length of data in model
         # for datapoint in range(self._model.datapoints):
@@ -50,7 +50,7 @@ class MainWindow(QMainWindow):
                             9: ['90-99', 11]}
 
         #'<=13%|14%|15%|16%|17%|18%|19%|20%|21%|22%|23%|24%|>=25%'
-        self.ipr_states = {-1: 'unset',
+        self.ipr_states = {-1: ['unset'],
                             0: ['\u2264 13%', 0.13],
                             1: ['14%', 0.14], 
                             2: ['15%', 0.15], 
@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
                             11: ['24%', 0.24],
                             12: ['\u2265 25%', 0.25]}
 
-        self.ifr_states = {-1: 'unset',
+        self.ifr_states = {-1: ['unset'],
                            0: ['0.0%', 0],
                            1: ['0.1%', 0.001], 
                            2: ['0.2%', 0.002], 
@@ -119,10 +119,10 @@ class MainWindow(QMainWindow):
         vars_values = np.matrix(data=vars_values, dtype=np.float64)
 
         # the default color palette is not enough, so I defined my own with 20 colors
-        colors = ['#C977D9', '#A18AE6', '#8AA2E6', '#8BD1E7', '#8AF3CF', 
-                  '#85F38E', '#BDF385', '#EDE485', '#F0B086', '#DE9F8B', 
-                  '#74A3B3', '#99CC70', '#DCD68E', '#EDDFAD', '#F7E8CA', 
-                  '#FFF9F3', '#FFF9F6', '#FFFBF9', '#FFFCFA', '#FFFEFD']
+        self.colors = ['#C977D9', '#A18AE6', '#8AA2E6', '#8BD1E7', '#8AF3CF', 
+                        '#85F38E', '#BDF385', '#EDE485', '#F0B086', '#DE9F8B', 
+                        '#74A3B3', '#99CC70', '#DCD68E', '#EDDFAD', '#F7E8CA', 
+                        '#FFF9F3', '#FFF9F6', '#FFFBF9', '#FFFCFA', '#FFFEFD']
 
 
         series = QPercentBarSeries()
@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
         for k,s in enumerate(vars_values):
             #print(k, len(s))
             setI = QBarSet('{}'.format(k))
-            setI.setColor(QColor(colors[k]))
+            setI.setColor(QColor(self.colors[k]))
             #print(s[0], s[1] * 100)
             #print(s[0,4] * 100)
             #test.append(s[0,4] * 100)
@@ -192,7 +192,9 @@ class MainWindow(QMainWindow):
         #chartView = QChartView(chart)
         #chartView.setRenderHint(QPainter.Antialiasing)
 
-        self.widget.setChart(chart) 
+        self.plotAreaLeft.setChart(chart) 
+
+        self.plotAge(self.plotAreaRight)
 
 
         # connecting signals to slots
@@ -211,6 +213,10 @@ class MainWindow(QMainWindow):
         self.sldrTPos.valueChanged.connect(self.TPosSliderChanged)
         self.sldrIFR.valueChanged.connect(self.IFRSliderChanged)
         self.sldrIPR.valueChanged.connect(self.IPRSliderChanged)
+
+        self.actionProtocol_1.triggered.connect(self.preDefProtocol1)
+        self.actionProtocol_2.triggered.connect(self.preDefProtocol2)
+        self.actionProtocol_3.triggered.connect(self.preDefProtocol3)
 
         self.actionExit.triggered.connect(self.Exit)
         self.actionAbout.triggered.connect(self.About)
@@ -248,6 +254,152 @@ class MainWindow(QMainWindow):
                           '</font></b>:<br>' + str(res[k]) + '<br><br>' 
         self.DoReport(report_str)
 
+
+    def plotAge(self, widget_area):
+
+        inf_res = self.bnet.doInference(self.bnet.bn,
+                                        var_obs=['Age'])
+
+        #print('Protocolol 1.1: Tested Positive', inf_res['Tested Positive'])
+        
+        series = QBarSeries()
+        var_values = inf_res['Age']
+
+        for k,s in enumerate(var_values):
+            setI = QBarSet('{}'.format(k))
+            setI.setColor(QColor(self.colors[k]))
+
+            values = s/3711 * 100
+            print(k, values)
+            setI.append(values)
+            series.append(setI)        
+
+        chart = QChart()
+        #chart.setTheme(QChart.ChartThemeQt)
+        chart.addSeries(series)
+        #chart.addSeries(series2)
+        chart.setTitle('Age')
+
+        font = QFont()
+        font.setPixelSize(16)
+        font.setBold(True)
+
+        chart.setTitleFont(font)
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+
+        categories = ['0-9','10-19','20-29','30-39','40-49','50-59','60-69','70-79','80-89','90-99']
+        axisX = QBarCategoryAxis()
+        axisX.append(categories)
+        axisX.setLabelsAngle(-45)
+        axisX.setTitleText('Variables')
+        
+        
+        #chart.createDefaultAxes()
+        chart.addAxis(axisX, Qt.AlignBottom)
+        
+
+        axisY = QValueAxis()
+        axisY.setRange(0,100)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        chart.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        # TODO: Y-axis set tick interval 10
+        # TODO: Y-axis horizontal lines
+
+        chart.legend().setVisible(False)
+        chart.legend().setAlignment(Qt.AlignBottom)
+
+        widget_area.setChart(chart) 
+
+
+    
+    def preDefProtocol1(self):
+
+        inf_res = self.bnet.doInference(self.bnet.bn,
+                                        var_obs=['Tested Positive'],
+                                        evs={'COVID-19 Status': 1})
+
+        print('Protocolol 1.1: Tested Positive', inf_res['Tested Positive'])
+        
+        colorsRedGreen = ['#E5B4CD', '#ABE594']
+        series = QBarSeries()
+        var_values = inf_res['Tested Positive']
+
+        for k,s in enumerate(var_values):
+            #print(k, len(s))
+            setI = QBarSet('{}'.format(k))
+            setI.setColor(QColor(colorsRedGreen[k]))
+            #print(s[0], s[1] * 100)
+            #print(s[0,4] * 100)
+            #test.append(s[0,4] * 100)
+
+            print(k, s)
+
+            values = s * 100
+            setI.append(values)
+            series.append(setI)        
+
+        chart = QChart()
+        #chart.setTheme(QChart.ChartThemeQt)
+        chart.addSeries(series)
+        #chart.addSeries(series2)
+        chart.setTitle("DSS - Diamond Princess cruise ship\nTested Positive")
+
+        font = QFont()
+        font.setPixelSize(16)
+        font.setBold(True)
+
+        chart.setTitleFont(font)
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+
+        categories = ['No', 'Yes']
+        axisX = QBarCategoryAxis()
+        axisX.append(categories)
+        axisX.setLabelsAngle(-45)
+        axisX.setTitleText('Variables')
+        axisX.setFont(font)
+        
+        #chart.createDefaultAxes()
+        chart.addAxis(axisX, Qt.AlignBottom)
+        
+
+        axisY = QValueAxis()
+        axisY.setRange(0,100)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        chart.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        # TODO: Y-axis set tick interval 10
+        # TODO: Y-axis horizontal lines
+
+        chart.legend().setVisible(False)
+        chart.legend().setAlignment(Qt.AlignBottom)
+
+        self.widget.setChart(chart) 
+
+
+
+
+
+
+    def preDefProtocol2(self):
+        self.NotAvailable()
+
+    def preDefProtocol3(self):
+        self.NotAvailable()
+
+
+    def setInitalData(self):
+        pass
 
     def MouseOnBar(self, status, index, barset):
         if status:
@@ -342,6 +494,11 @@ class MainWindow(QMainWindow):
 
         self.lblIPR.setText(lblText)
 
+
+    def NotAvailable(self):
+        QMessageBox.warning(self,
+                    'Not available...',
+                    'This function is not available yet.')
 
     def About(self):
         QMessageBox.about(self,

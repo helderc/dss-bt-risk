@@ -246,7 +246,7 @@ class BayesianNet(object):
             Bayesian network.
         evs : dict
             evidence to be set according to PyAgrum format
-        var_obs : str
+        var_obs : list
             variable observed. The variable specified will be returned by the function.
         """
 
