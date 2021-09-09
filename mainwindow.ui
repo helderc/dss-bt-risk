@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>960</width>
-    <height>858</height>
+    <height>872</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -279,28 +279,6 @@
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="sldrCovS">
-             <property name="minimum">
-              <number>-1</number>
-             </property>
-             <property name="maximum">
-              <number>2</number>
-             </property>
-             <property name="pageStep">
-              <number>1</number>
-             </property>
-             <property name="sliderPosition">
-              <number>-1</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="tickPosition">
-              <enum>QSlider::TicksAbove</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="Line" name="line_2">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -322,28 +300,6 @@
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="sldrTPos">
-             <property name="minimum">
-              <number>-1</number>
-             </property>
-             <property name="maximum">
-              <number>1</number>
-             </property>
-             <property name="pageStep">
-              <number>1</number>
-             </property>
-             <property name="sliderPosition">
-              <number>-1</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="tickPosition">
-              <enum>QSlider::TicksAbove</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
               <widget class="QRadioButton" name="rdbTPosNone">
@@ -360,6 +316,9 @@
                <property name="checked">
                 <bool>true</bool>
                </property>
+               <attribute name="buttonGroup">
+                <string notr="true">bgrpTPos</string>
+               </attribute>
               </widget>
              </item>
              <item>
@@ -374,6 +333,9 @@
                <property name="text">
                 <string>Yes</string>
                </property>
+               <attribute name="buttonGroup">
+                <string notr="true">bgrpTPos</string>
+               </attribute>
               </widget>
              </item>
              <item>
@@ -388,6 +350,9 @@
                <property name="text">
                 <string>No</string>
                </property>
+               <attribute name="buttonGroup">
+                <string notr="true">bgrpTPos</string>
+               </attribute>
               </widget>
              </item>
             </layout>
@@ -508,9 +473,9 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QCheckBox" name="checkBox_5">
+            <widget class="QCheckBox" name="ckbPofS">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="font">
               <font>
@@ -541,7 +506,7 @@
            <item>
             <widget class="QCheckBox" name="ckbIPR">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="font">
               <font>
@@ -572,7 +537,7 @@
            <item>
             <widget class="QCheckBox" name="ckbCovS">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="font">
               <font>
@@ -587,9 +552,9 @@
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBox_6">
+            <widget class="QCheckBox" name="ckbFPR">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="font">
               <font>
@@ -604,9 +569,9 @@
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBox_2">
+            <widget class="QCheckBox" name="ckbFNR">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="font">
               <font>
@@ -623,7 +588,7 @@
            <item>
             <widget class="QCheckBox" name="ckbTPos">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="font">
               <font>
@@ -640,7 +605,7 @@
            <item>
             <widget class="QCheckBox" name="ckbIFR">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="font">
               <font>
@@ -839,5 +804,6 @@ p, li { white-space: pre-wrap; }
  <connections/>
  <buttongroups>
   <buttongroup name="bgrpCovS"/>
+  <buttongroup name="bgrpTPos"/>
  </buttongroups>
 </ui>

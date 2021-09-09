@@ -21,19 +21,6 @@ class MainWindow(QMainWindow):
         
         uic.loadUi("mainwindow.ui", self)
 
-        # Generate checkboxes based on length of data in model
-        # for datapoint in range(self._model.datapoints):
-        #     self.tempCheck = QtWidgets.QCheckBox(self.scenarioGroupBox)
-        #     self.tempCheck.setFont(QtGui.QFont('SansSerif', 13))
-        #     self.tempCheck.setObjectName(str(datapoint))
-        #     self.tempCheck.toggled.connect(self.updateGraph)
-        #     self.verticalLayout.addWidget(self.tempCheck, alignment=QtCore.Qt.AlignTop)
-        #     self.tempCheck.setText(
-        #         QtCore.QCoreApplication.translate(
-        #             "MainWindow", f"Scenario {datapoint+1}"
-        #         )
-        #     )
-
         # Data considered
         self.total_population = 3711
         # total_age = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
@@ -78,12 +65,7 @@ class MainWindow(QMainWindow):
                            9: ['0.9%', 0.009], 
                            10: ['1.0%', 0.01]}
 
-
-
-        self.bnet = BayesianNet()
-
-        self.var_observe = []
-        self.var_evidences = {}
+        self.ResetSetup()
 
         # initial plotting
         self.plotAll(self.plotAreaLeft)
@@ -91,18 +73,24 @@ class MainWindow(QMainWindow):
 
         # connecting signals to slots
         self.btnAnalyze.clicked.connect(self.Analyze)
-        #self.btnReset.clicked.connect(self.Reset)
+        self.btnReset.clicked.connect(self.ResetSetup)
 
         # TODO: to be used for tooltips
         #self.series.hovered.connect(self.MouseOnBar)
-
+        
+        #self.rdbCovSNone.toggled(self.rdbCovS)
+        #self.rdbCovSInfAsymp.toggled(self.rdbCovS)
+        #self.rdbCovSInfSymp.toggled(self.rdbCovS)
+        #self.rdbCovSNotInf.toggled(self.rdbCovS)
+        self.bgrpCovS.buttonToggled.connect(self.rdbCovS)
+        self.bgrpTPos.buttonToggled.connect(self.rdbTPos)
+        
+        
         self.ckbAge.stateChanged.connect(self.SetObserve)
         self.ckbGender.stateChanged.connect(self.SetObserve)
         self.ckbCovS.stateChanged.connect(self.SetObserve)
 
         self.sldrAge.valueChanged.connect(self.AgeSliderChanged)
-        self.sldrCovS.valueChanged.connect(self.CovSSliderChanged)
-        self.sldrTPos.valueChanged.connect(self.TPosSliderChanged)
         self.sldrIFR.valueChanged.connect(self.IFRSliderChanged)
         self.sldrIPR.valueChanged.connect(self.IPRSliderChanged)
 
@@ -113,12 +101,104 @@ class MainWindow(QMainWindow):
         self.actionExit.triggered.connect(self.Exit)
         self.actionAbout.triggered.connect(self.About)
         self.actionAbout_Qt.triggered.connect(self.AboutQt)
+        
 
-    def ResetSetup(self):
-        # reset interface and variables
-        print('--> Reset')
+    def ResetSetup(self) -> None:
+        '''
+        Reset interface and variables
 
-    def DoReport(self, txt):
+        Returns
+        -------
+        None.
+
+        '''
+        
+        # Reseting interface        
+        self.sldrAge.setSliderPosition(-1)
+        self.sldrIFR.setSliderPosition(-1)
+        self.sldrIPR.setSliderPosition(-1)
+        
+        self.rdbCovSNone.setChecked(True)
+        self.rdbTPosNone.setChecked(True)
+                
+        self.ckbPofS.setChecked(False)
+        self.ckbAge.setChecked(False)
+        self.ckbIPR.setChecked(False)
+        self.ckbGender.setChecked(False)
+        self.ckbCovS.setChecked(False)
+        self.ckbFPR.setChecked(False)
+        self.ckbFNR.setChecked(False)
+        self.ckbTPos.setChecked(False)
+        self.ckbIFR.setChecked(False)
+        
+        # Reseting variables
+        self.bnet = BayesianNet()
+        self.var_observe = []
+        self.var_evidences = {}
+        
+    def rdbCovS(self, btn, checked):
+        if checked:
+            btn_lbl = btn.objectName()
+            
+            if btn_lbl == 'rdbCovSNone':
+                idx = -1
+            elif btn_lbl == 'rdbCovSInfSymp':
+                idx = 0
+            elif btn_lbl == 'rdbCovSInfAsymp':
+                idx = 1
+            elif btn_lbl == 'rdbCovSNotInf':
+                idx = 2
+            else:
+                print('ERROR (rdbCovS): State not found')
+                return
+
+            # FIX: do I need this dict? Maybe set the string into the if-else above?
+            covs_states = {-1: 'unset',
+                          0: 'Infected w/ Symp.',
+                          1: 'Infected w/o Symp.',
+                          2: 'Not Infected'}
+
+            # unset situation
+            lblText = f'Covid-19 Status (CovS): {covs_states[idx]}'
+            if 'COVID-19 Status' in self.var_evidences:
+                del self.var_evidences['COVID-19 Status']
+                
+            # diff from unset
+            if idx != -1:
+                lblText = f'<b>Covid-19 Status (CovS): <font color="red">{covs_states[idx]}</font></b>'
+                self.var_evidences['COVID-19 Status'] = idx
+
+            self.lblCovS.setText(lblText)
+
+
+    def rdbTPos(self, btn, checked):
+        if checked:
+            btn_lbl = btn.objectName()
+            
+            if btn_lbl == 'rdbTPosNone':
+                idx = -1
+            elif btn_lbl == 'rdbTPosNo':
+                idx = 0
+            elif btn_lbl == 'rdbTPosYes':
+                idx = 1
+            else:
+                print('ERROR (rdbTPos): State not found')
+                return
+            
+            tpos_states = {-1: 'unset',
+                          0: 'No',
+                          1: 'Yes'}
+
+            lblText = f'Tested Positive (TPos): {tpos_states[idx]}'
+            if idx != -1:
+                lblText = f'<b>Tested Positive (TPos):<font color="red"> {tpos_states[idx]}</font></b>'
+                # TODO: set evidence
+                # self.var_evidences['COVID-19 Status'] = idx
+    
+            self.lblTPos.setText(lblText)
+        
+
+    def DoReport(self, txt) -> None:
         txt2 = '<b>Date</b>: February, 2020.<br><br>' +\
               '<b><u>Subject</u></b>: Diamond Princess cruise ship.<br>' +\
               '<b><u>Warning level</u></b>: <i><font color="red">Low</font></i>.<br>' +\
@@ -137,7 +217,7 @@ class MainWindow(QMainWindow):
         res = self.bnet.doInference(self.bnet.bn, 
                                     var_obs=self.var_observe, 
                                     evs=self.var_evidences)
-        print(res)
+        #print(res)
 
         report_str = ''
         for k in res:
@@ -145,6 +225,7 @@ class MainWindow(QMainWindow):
             report_str += '<b><font color="red">' + k +\
                           '</font></b>:<br>' + str(res[k]) + '<br><br>' 
         self.DoReport(report_str)
+
 
     def plotAll(self, widget_area):
         # don't need to do inference        
@@ -164,9 +245,6 @@ class MainWindow(QMainWindow):
         widget_area.setChart(age_graph) 
 
 
-
-
-    
     def preDefProtocol1(self):
 
         inf_res = self.bnet.doInference(self.bnet.bn,
@@ -287,37 +365,6 @@ class MainWindow(QMainWindow):
                                                                 self.age_states[v][1]/3711*100,
                                                                 self.age_states[v][1])
         self.lblAge.setText(lblText)
-
-
-    def CovSSliderChanged(self, v):
-        covs_states = {-1: 'unset',
-                      0: 'Infected w/ Symp.',
-                      1: 'Infected w/o Symp.',
-                      2: 'Not Infected'}
-
-        # unset situation
-        lblText = f'Covid-19 Status (CovS): {covs_states[v]}'
-        if 'COVID-19 Status' in self.var_evidences:
-            del self.var_evidences['COVID-19 Status']
-        # diff from unset
-        if v != -1:
-            lblText = f'<b>Covid-19 Status (CovS): <font color="red">{covs_states[v]}</font></b>'
-            self.var_evidences['COVID-19 Status'] = v
-
-        print('CovS', v)
-        self.lblCovS.setText(lblText)
-
-
-    def TPosSliderChanged(self, v):
-        tpos_states = {-1: 'unset',
-                      0: 'No',
-                      1: 'Yes'}
-
-        lblText = f'Tested Positive (TPos): {tpos_states[v]}'
-        if v != -1:
-            lblText = f'<b>Tested Positive (TPos):<font color="red"> {tpos_states[v]}</font></b>'
-
-        self.lblTPos.setText(lblText)
 
 
     def IFRSliderChanged(self, v):

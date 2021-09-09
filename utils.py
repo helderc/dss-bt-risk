@@ -23,6 +23,8 @@ from PyQt5.QtCore import Qt
 class Data(object):
     def __init__(self) -> None:
         super().__init__()
+        
+        
 
     def getAll(self):
         # Organization by column:
@@ -136,7 +138,7 @@ class AgeGraph(BaseGraph):
             setI.setColor(QColor(self.colors[k]))
 
             values = s/3711 * 100
-            print(k, values)
+            #print(k, values)
             setI.append(values)
             series.append(setI)        
 
