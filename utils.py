@@ -34,7 +34,10 @@ class CustomTab(QChartView):
             data = Data().getAll()
             chart = AllGraph(data_values=data)
         elif tab_name == 'Age':
-            data = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
+            #data = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
+            data = [0.0043, 0.0062, 0.0933, 0.1151, 0.0898,
+                    0.1071, 0.2490, 0.2740, 0.0581, 0.0029]
+
             chart = AgeGraph(data_values=data)
         elif tab_name == 'Gender':
             return
@@ -167,14 +170,14 @@ class AgeGraph(BaseGraph):
         super().__init__()
 
         series = QBarSeries()
+        setI = QBarSet('age')
+        setI.setColor(QColor(self.colors[3]))
         for k,s in enumerate(data_values):
-            setI = QBarSet('{}'.format(k))
-            setI.setColor(QColor(self.colors[k]))
-
-            values = s/3711 * 100
+            #values = s/3711 * 100
+            v = s * 100
             #print(k, values)
-            setI.append(values)
-            series.append(setI)        
+            setI.append(v)
+        series.append(setI)        
 
         self.addSeries(series)
         self.setTitle('Age')
@@ -195,7 +198,7 @@ class AgeGraph(BaseGraph):
         self.addAxis(axisX, Qt.AlignBottom)
         
         axisY = QValueAxis()
-        axisY.setRange(0,100)
+        axisY.setRange(0,30)
         axisY.setTickCount(11)
         axisY.setLabelFormat('%d')
         axisY.setTickType(QValueAxis.TicksFixed)

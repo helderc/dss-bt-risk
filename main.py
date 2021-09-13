@@ -74,8 +74,8 @@ class MainWindow(QMainWindow):
         for t in tabs_lst:
             self.tabWidget.addTab(CustomTab(self, t), t)
 
-        self.plotAll(self.plotAreaLeft)
-        self.plotAge(self.plotAreaRight)
+        #self.plotAll(self.plotAreaLeft)
+        #self.plotAge(self.plotAreaRight)
 
         # connecting signals to slots
         self.btnAnalyze.clicked.connect(self.Analyze)
@@ -86,7 +86,6 @@ class MainWindow(QMainWindow):
         
         self.bgrpCovS.buttonToggled.connect(self.rdbCovS)
         self.bgrpTPos.buttonToggled.connect(self.rdbTPos)
-        
         
         self.ckbAge.stateChanged.connect(self.SetObserve)
         self.ckbGender.stateChanged.connect(self.SetObserve)
@@ -228,13 +227,6 @@ class MainWindow(QMainWindow):
                           '</font></b>:<br>' + str(res[k]) + '<br><br>' 
         self.DoReport(report_str)
 
-
-    def plotAll(self, widget_area):
-        # don't need to do inference        
-        vars_values = Data().getAll()
-        chart_left = AllGraph(vars_values)
-
-        widget_area.setChart(chart_left) 
 
 
     def plotAge(self, widget_area, evs={}):
