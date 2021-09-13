@@ -107,14 +107,26 @@ class BaseGraph(QChart):
                         '#85F38E', '#BDF385', '#EDE485', '#F0B086', '#DE9F8B', 
                         '#74A3B3', '#99CC70', '#DCD68E', '#EDDFAD', '#F7E8CA', 
                         '#FFF9F3', '#FFF9F6', '#FFFBF9', '#FFFCFA', '#FFFEFD']
+    
+        self.label_lst = [] 
+
+    def MouseOnBar(self, status, index, barset):
+        if status:
+            txt = '{} / {:.1f}%'.format(self.label_lst[index],barset[index])
+            #self.statusbar.showMessage(txt)
+            self.setToolTip(txt)
 
 
 class AllGraph(BaseGraph):
     def __init__(self, data_values) -> None:
         super().__init__()
 
+        # TODO: fill the list of labels
+        self.label_lst = [''] * 100
+
         series = QPercentBarSeries()
-        #test = []
+        series.hovered.connect(self.MouseOnBar)
+        
         for k,s in enumerate(data_values):
             #print(k, len(s))
             setI = QBarSet('{}'.format(k))
@@ -169,7 +181,13 @@ class AgeGraph(BaseGraph):
     def __init__(self, data_values) -> None:
         super().__init__()
 
+        # used in the tooltips and X-labels
+        self.label_lst = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', 
+                          '60-69', '70-79', '80-89', '90-99']
+        
         series = QBarSeries()
+        series.hovered.connect(self.MouseOnBar)
+
         setI = QBarSet('age')
         setI.setColor(QColor(self.colors[3]))
         for k,s in enumerate(data_values):
@@ -188,10 +206,9 @@ class AgeGraph(BaseGraph):
 
         self.setTitleFont(font)
         self.setAnimationOptions(QChart.SeriesAnimations)
-
-        categories = ['0-9','10-19','20-29','30-39','40-49','50-59','60-69','70-79','80-89','90-99']
+        
         axisX = QBarCategoryAxis()
-        axisX.append(categories)
+        axisX.append(self.label_lst)
         axisX.setLabelsAngle(-45)
         axisX.setTitleText('Variables')
         

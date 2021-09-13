@@ -81,9 +81,6 @@ class MainWindow(QMainWindow):
         self.btnAnalyze.clicked.connect(self.Analyze)
         self.btnReset.clicked.connect(self.ResetSetup)
 
-        # TODO: to be used for tooltips
-        #self.series.hovered.connect(self.MouseOnBar)
-        
         self.bgrpCovS.buttonToggled.connect(self.rdbCovS)
         self.bgrpTPos.buttonToggled.connect(self.rdbTPos)
         
@@ -308,27 +305,14 @@ class MainWindow(QMainWindow):
         self.widget.setChart(chart) 
 
 
-
-
-
-
     def preDefProtocol2(self):
         self.NotAvailable()
 
     def preDefProtocol3(self):
         self.NotAvailable()
 
-
     def setInitalData(self):
         pass
-
-    def MouseOnBar(self, status, index, barset):
-        if status:
-            #print(index, barset.label(), barset[index])
-            txt = '{} / {:.1f}%'.format(barset.label(),barset[index])
-            self.statusbar.showMessage(txt)
-            self.plotAge.setToolTip(txt)
-
 
     def SetObserve(self, state):
         widget_name = self.sender().objectName()
@@ -401,7 +385,7 @@ class MainWindow(QMainWindow):
     def Exit(self):
         # QtWidgets.qApp.quit
         self.close()
-        
+
 
 def main():
     app = QApplication(sys.argv)
