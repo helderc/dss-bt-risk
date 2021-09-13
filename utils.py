@@ -14,11 +14,53 @@ Created on:   2021/08/31 18:59:58
 
 import numpy as np
 
-from PyQt5.QtWidgets import QMessageBox, QToolTip
+from PyQt5.QtWidgets import QMessageBox, QToolTip, QWidget, QVBoxLayout
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
-from PyQt5.QtChart import QChart, QChartView, QBarSet, QValueAxis, QPercentBarSeries, QBarCategoryAxis, QBarSeries, QHorizontalPercentBarSeries
+from PyQt5.QtChart import QChart, QChartView, QBarSet, QValueAxis, \
+                          QPercentBarSeries, QBarCategoryAxis, QBarSeries, \
+                          QHorizontalPercentBarSeries
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtCore import Qt
+
+
+class CustomTab(QChartView):
+    def __init__(self, parent, tab_name) -> None:
+        super().__init__(parent=parent)
+        
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+
+        if tab_name == 'All':
+            data = Data().getAll()
+            chart = AllGraph(data_values=data)
+        elif tab_name == 'Age':
+            data = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
+            chart = AgeGraph(data_values=data)
+        elif tab_name == 'Gender':
+            return
+        elif tab_name == 'PofS':
+            return
+        elif tab_name == 'IPR':
+            return
+        elif tab_name == 'FNR':
+            return
+        elif tab_name == 'FPR':
+            return
+        elif tab_name == 'CovS':
+            return
+        elif tab_name == 'TPos':
+            return
+        elif tab_name == 'IFR':
+            return
+        else:
+            QMessageBox.warning(self,
+                                'Not available...',
+                                'This function is not available yet.')
+            return
+        self.setChart(chart)
+
+        pass
+
 
 class Data(object):
     def __init__(self) -> None:
@@ -53,7 +95,7 @@ class Data(object):
         return vars_values
 
 
-class BaseGraph(object):
+class BaseGraph(QChart):
     def __init__(self) -> None:
         super().__init__()
 
@@ -74,27 +116,24 @@ class AllGraph(BaseGraph):
             #print(k, len(s))
             setI = QBarSet('{}'.format(k))
             setI.setColor(QColor(self.colors[k]))
-            #print(s[0], s[1] * 100)
-            #print(s[0,4] * 100)
-            #test.append(s[0,4] * 100)
 
             values = (s[0] * 100).tolist()[0]
             setI.append(values)
             series.append(setI)  
 
-
-        self.chart = QChart()
+        # QChart properties
+        #self.chart = QChart()
         #chart.setTheme(QChart.ChartThemeQt)
-        self.chart.addSeries(series)
+        self.addSeries(series)
         #chart.addSeries(series2)
-        self.chart.setTitle("DSS - Diamond Princess cruise ship")
+        self.setTitle("DSS - Diamond Princess cruise ship")
 
         font = QFont()
         font.setPixelSize(14)
         font.setBold(True)
 
-        self.chart.setTitleFont(font)
-        self.chart.setAnimationOptions(QChart.SeriesAnimations)
+        self.setTitleFont(font)
+        self.setAnimationOptions(QChart.SeriesAnimations)
 
         categories = ['Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 'CovS', 'TPos', 'IFR']
         axisX = QBarCategoryAxis()
@@ -103,7 +142,7 @@ class AllGraph(BaseGraph):
         axisX.setTitleText('Variables')
         
         #chart.createDefaultAxes()
-        self.chart.addAxis(axisX, Qt.AlignBottom)
+        self.addAxis(axisX, Qt.AlignBottom)
         
 
         axisY = QValueAxis()
@@ -113,24 +152,19 @@ class AllGraph(BaseGraph):
         axisY.setTickType(QValueAxis.TicksFixed)
         axisY.setTitleText('Percentage')
 
-        self.chart.addAxis(axisY, Qt.AlignLeft)
+        self.addAxis(axisY, Qt.AlignLeft)
         series.attachAxis(axisY)
 
         # TODO: Y-axis set tick interval 10
         # TODO: Y-axis horizontal lines
 
-        self.chart.legend().setVisible(False)
-        self.chart.legend().setAlignment(Qt.AlignBottom)
-
-
-    def getGraph(self):
-        return self.chart
+        self.legend().setVisible(False)
+        self.legend().setAlignment(Qt.AlignBottom)
 
 
 class AgeGraph(BaseGraph):
     def __init__(self, data_values) -> None:
         super().__init__()
-
 
         series = QBarSeries()
         for k,s in enumerate(data_values):
@@ -142,18 +176,15 @@ class AgeGraph(BaseGraph):
             setI.append(values)
             series.append(setI)        
 
-        self.chart = QChart()
-        #chart.setTheme(QChart.ChartThemeQt)
-        self.chart.addSeries(series)
-        #chart.addSeries(series2)
-        self.chart.setTitle('Age')
+        self.addSeries(series)
+        self.setTitle('Age')
 
         font = QFont()
         font.setPixelSize(16)
         font.setBold(True)
 
-        self.chart.setTitleFont(font)
-        self.chart.setAnimationOptions(QChart.SeriesAnimations)
+        self.setTitleFont(font)
+        self.setAnimationOptions(QChart.SeriesAnimations)
 
         categories = ['0-9','10-19','20-29','30-39','40-49','50-59','60-69','70-79','80-89','90-99']
         axisX = QBarCategoryAxis()
@@ -161,7 +192,7 @@ class AgeGraph(BaseGraph):
         axisX.setLabelsAngle(-45)
         axisX.setTitleText('Variables')
         
-        self.chart.addAxis(axisX, Qt.AlignBottom)
+        self.addAxis(axisX, Qt.AlignBottom)
         
         axisY = QValueAxis()
         axisY.setRange(0,100)
@@ -170,15 +201,12 @@ class AgeGraph(BaseGraph):
         axisY.setTickType(QValueAxis.TicksFixed)
         axisY.setTitleText('Percentage')
 
-        self.chart.addAxis(axisY, Qt.AlignLeft)
+        self.addAxis(axisY, Qt.AlignLeft)
         series.attachAxis(axisY)
 
         # TODO: Y-axis set tick interval 10
         # TODO: Y-axis horizontal lines
 
-        self.chart.legend().setVisible(False)
-        self.chart.legend().setAlignment(Qt.AlignBottom)
-
-    def getGraph(self):
-        return self.chart
+        self.legend().setVisible(False)
+        self.legend().setAlignment(Qt.AlignBottom)
         

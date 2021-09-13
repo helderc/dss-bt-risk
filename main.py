@@ -13,7 +13,7 @@ from PyQt5.QtGui import QPainter, QFont, QColor
 from PyQt5.QtCore import Qt
 
 from bayesiannet import BayesianNet
-from utils import AllGraph, Data, AgeGraph
+from utils import AllGraph, Data, AgeGraph, CustomTab
 
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -66,8 +66,14 @@ class MainWindow(QMainWindow):
                            10: ['1.0%', 0.01]}
 
         self.ResetSetup()
+        self.bnet = BayesianNet()
 
         # initial plotting
+        tabs_lst = ['All', 'Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 
+                    'CovS', 'TPos', 'IFR']
+        for t in tabs_lst:
+            self.tabWidget.addTab(CustomTab(self, t), t)
+
         self.plotAll(self.plotAreaLeft)
         self.plotAge(self.plotAreaRight)
 
@@ -78,10 +84,6 @@ class MainWindow(QMainWindow):
         # TODO: to be used for tooltips
         #self.series.hovered.connect(self.MouseOnBar)
         
-        #self.rdbCovSNone.toggled(self.rdbCovS)
-        #self.rdbCovSInfAsymp.toggled(self.rdbCovS)
-        #self.rdbCovSInfSymp.toggled(self.rdbCovS)
-        #self.rdbCovSNotInf.toggled(self.rdbCovS)
         self.bgrpCovS.buttonToggled.connect(self.rdbCovS)
         self.bgrpTPos.buttonToggled.connect(self.rdbTPos)
         
@@ -132,9 +134,9 @@ class MainWindow(QMainWindow):
         self.ckbIFR.setChecked(False)
         
         # Reseting variables
-        self.bnet = BayesianNet()
         self.var_observe = []
         self.var_evidences = {}
+
         
     def rdbCovS(self, btn, checked):
         if checked:
@@ -230,7 +232,7 @@ class MainWindow(QMainWindow):
     def plotAll(self, widget_area):
         # don't need to do inference        
         vars_values = Data().getAll()
-        chart_left = AllGraph(vars_values).getGraph()
+        chart_left = AllGraph(vars_values)
 
         widget_area.setChart(chart_left) 
 
@@ -240,7 +242,7 @@ class MainWindow(QMainWindow):
         inf_res = self.bnet.doInference(self.bnet.bn, 
                                         var_obs=['Age'],
                                         evs=evs)
-        age_graph = AgeGraph(inf_res['Age']).getGraph()
+        age_graph = AgeGraph(inf_res['Age'])
 
         widget_area.setChart(age_graph) 
 
