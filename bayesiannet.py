@@ -35,7 +35,6 @@ class BayesianNet(object):
         self.populatingCPTs(self.bn)
 
         #gnb.showInference(self.bn, size='45')
-    
 
     def norm_dist(self, x, mean, std_dev):
         dist = norm.pdf(x, loc=mean, scale=std_dev, random_state=self.r_seed)
@@ -71,8 +70,8 @@ class BayesianNet(object):
         # Sensitivity: 1 - FNR
         df_tests['Sensitivity'] = (1 - df_tests['FNR']) * 100
 
-        df_stats = pd.DataFrame({'Mean':df_tests.mean(), 
-                         'Std':df_tests.std()})
+        df_stats = pd.DataFrame({'Mean':df_tests.mean(numeric_only=True), 
+                         'Std':df_tests.std(numeric_only=True)})
         df_stats = df_stats.T
 
 
@@ -262,3 +261,6 @@ class BayesianNet(object):
             all_vars[v] = ie.posterior(v).toarray()
 
         return all_vars
+
+    def getBN(self):
+        return self.bn

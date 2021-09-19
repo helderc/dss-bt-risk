@@ -13,7 +13,7 @@ from PyQt5.QtGui import QPainter, QFont, QColor
 from PyQt5.QtCore import Qt
 
 from bayesiannet import BayesianNet
-from utils import AllGraph, Data, AgeGraph, CustomTab
+from utils import AllGraph, Data, AgeGraph, CustomTab, BNTab
 
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -65,8 +65,14 @@ class MainWindow(QMainWindow):
                            9: ['0.9%', 0.009], 
                            10: ['1.0%', 0.01]}
 
-        self.ResetSetup()
+        self.Reset()
         self.bnet = BayesianNet()
+
+        # TODO: Show a tab with the BN
+        #bntab = BNTab(self, bn=self.bnet.getBN())
+        #self.tabWidget.addTab(bntab, 'BayesNet')
+        #bntab.update()
+
 
         # initial plotting
         tabs_lst = ['All', 'Age', 'Gender', 'PofS', 'IPR', 'FNR', 'FPR', 
@@ -79,7 +85,7 @@ class MainWindow(QMainWindow):
 
         # connecting signals to slots
         self.btnAnalyze.clicked.connect(self.Analyze)
-        self.btnReset.clicked.connect(self.ResetSetup)
+        self.btnReset.clicked.connect(self.Reset)
 
         self.bgrpCovS.buttonToggled.connect(self.rdbCovS)
         self.bgrpTPos.buttonToggled.connect(self.rdbTPos)
@@ -101,7 +107,7 @@ class MainWindow(QMainWindow):
         self.actionAbout_Qt.triggered.connect(self.AboutQt)
         
 
-    def ResetSetup(self) -> None:
+    def Reset(self) -> None:
         '''
         Reset interface and variables
 
@@ -128,6 +134,8 @@ class MainWindow(QMainWindow):
         self.ckbFNR.setChecked(False)
         self.ckbTPos.setChecked(False)
         self.ckbIFR.setChecked(False)
+
+        self.txtEdtReport.clear()
         
         # Reseting variables
         self.var_observe = []
@@ -212,6 +220,9 @@ class MainWindow(QMainWindow):
 
 
     def Analyze(self):
+        # TODO: Loop trough all the variables set and OBS. Compose a text based
+        #       on them: P (OBS | EVS)
+
         res = self.bnet.doInference(self.bnet.bn, 
                                     var_obs=self.var_observe, 
                                     evs=self.var_evidences)
@@ -237,72 +248,22 @@ class MainWindow(QMainWindow):
 
 
     def preDefProtocol1(self):
-
-        inf_res = self.bnet.doInference(self.bnet.bn,
-                                        var_obs=['Tested Positive'],
-                                        evs={'COVID-19 Status': 1})
-
-        print('Protocolol 1.1: Tested Positive', inf_res['Tested Positive'])
+        """[summary]
+        """        
         
-        colorsRedGreen = ['#E5B4CD', '#ABE594']
-        series = QBarSeries()
-        var_values = inf_res['Tested Positive']
+        #TODO: set widgets --> Analyze
+        self.rdbCovSInfAsymp.setChecked(True)
+        self.ckbTPos.setChecked(True)
 
-        for k,s in enumerate(var_values):
-            #print(k, len(s))
-            setI = QBarSet('{}'.format(k))
-            setI.setColor(QColor(colorsRedGreen[k]))
-            #print(s[0], s[1] * 100)
-            #print(s[0,4] * 100)
-            #test.append(s[0,4] * 100)
+        self.Analyze()
 
-            print(k, s)
+        # inf_res = self.bnet.doInference(self.bnet.bn,
+        #                                 var_obs=['Tested Positive'],
+        #                                 evs={'COVID-19 Status': 1})
 
-            values = s * 100
-            setI.append(values)
-            series.append(setI)        
-
-        chart = QChart()
-        #chart.setTheme(QChart.ChartThemeQt)
-        chart.addSeries(series)
-        #chart.addSeries(series2)
-        chart.setTitle("DSS - Diamond Princess cruise ship\nTested Positive")
-
-        font = QFont()
-        font.setPixelSize(16)
-        font.setBold(True)
-
-        chart.setTitleFont(font)
-        chart.setAnimationOptions(QChart.SeriesAnimations)
-
-        categories = ['No', 'Yes']
-        axisX = QBarCategoryAxis()
-        axisX.append(categories)
-        axisX.setLabelsAngle(-45)
-        axisX.setTitleText('Variables')
-        axisX.setFont(font)
+        # print('Protocolol 1.1: Tested Positive', inf_res['Tested Positive'])
         
-        #chart.createDefaultAxes()
-        chart.addAxis(axisX, Qt.AlignBottom)
         
-
-        axisY = QValueAxis()
-        axisY.setRange(0,100)
-        axisY.setTickCount(11)
-        axisY.setLabelFormat('%d')
-        axisY.setTickType(QValueAxis.TicksFixed)
-        axisY.setTitleText('Percentage')
-
-        chart.addAxis(axisY, Qt.AlignLeft)
-        series.attachAxis(axisY)
-
-        # TODO: Y-axis set tick interval 10
-        # TODO: Y-axis horizontal lines
-
-        chart.legend().setVisible(False)
-        chart.legend().setAlignment(Qt.AlignBottom)
-
-        self.widget.setChart(chart) 
 
 
     def preDefProtocol2(self):

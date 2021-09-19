@@ -14,14 +14,16 @@ Created on:   2021/08/31 18:59:58
 
 import numpy as np
 
-from PyQt5.QtWidgets import QMessageBox, QToolTip, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QMessageBox, QScrollArea, QToolTip, QWidget, \
+                            QVBoxLayout, QAbstractScrollArea, QLabel
+from PyQt5.QtSvg import QSvgWidget
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 from PyQt5.QtChart import QChart, QChartView, QBarSet, QValueAxis, \
                           QPercentBarSeries, QBarCategoryAxis, QBarSeries, \
                           QHorizontalPercentBarSeries
-from PyQt5.QtGui import QFont, QColor
+from PyQt5.QtGui import QFont, QColor, QPixmap
 from PyQt5.QtCore import Qt
-
+import cairosvg
 
 class CustomTab(QChartView):
     def __init__(self, parent, tab_name) -> None:
@@ -62,7 +64,17 @@ class CustomTab(QChartView):
             return
         self.setChart(chart)
 
-        pass
+
+class BNTab(QScrollArea):
+    def __init__(self, parent, bn) -> None:
+        super().__init__(parent=parent)
+
+        self.widget = QLabel(self)
+        # TODO: to show the BN. Calling gnb doesnt work, it needs to be called in a jupyter NB only.
+        # svg = gnb.getInference(bn, evs={}).encode("UTF-8")
+        # png = cairosvg.svg2png(bytestring=svg)
+        # self.widget.setPixmap(QPixmap.loadFromData(png))
+        # self.widget.repaint()
 
 
 class Data(object):
@@ -112,7 +124,7 @@ class BaseGraph(QChart):
 
     def MouseOnBar(self, status, index, barset):
         if status:
-            txt = '{} / {:.1f}%'.format(self.label_lst[index],barset[index])
+            txt = '{}, {:.1f}%'.format(self.label_lst[index],barset[index])
             #self.statusbar.showMessage(txt)
             self.setToolTip(txt)
 
@@ -209,7 +221,7 @@ class AgeGraph(BaseGraph):
         
         axisX = QBarCategoryAxis()
         axisX.append(self.label_lst)
-        axisX.setLabelsAngle(-45)
+        #axisX.setLabelsAngle(-45)
         axisX.setTitleText('Variables')
         
         self.addAxis(axisX, Qt.AlignBottom)
@@ -230,3 +242,67 @@ class AgeGraph(BaseGraph):
         self.legend().setVisible(False)
         self.legend().setAlignment(Qt.AlignBottom)
         
+
+class TPosGraph(BaseGraph):
+    def __init__(self, data_values) -> None:
+        super().__init__()
+
+        colorsRedGreen = ['#E5B4CD', '#ABE594']
+        series = QBarSeries()
+        var_values = inf_res['Tested Positive']
+
+        for k,s in enumerate(var_values):
+            #print(k, len(s))
+            setI = QBarSet('{}'.format(k))
+            setI.setColor(QColor(colorsRedGreen[k]))
+            #print(s[0], s[1] * 100)
+            #print(s[0,4] * 100)
+            #test.append(s[0,4] * 100)
+
+            print(k, s)
+
+            values = s * 100
+            setI.append(values)
+            series.append(setI)        
+
+        chart = QChart()
+        #chart.setTheme(QChart.ChartThemeQt)
+        chart.addSeries(series)
+        #chart.addSeries(series2)
+        chart.setTitle("DSS - Diamond Princess cruise ship\nTested Positive")
+
+        font = QFont()
+        font.setPixelSize(16)
+        font.setBold(True)
+
+        chart.setTitleFont(font)
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+
+        categories = ['No', 'Yes']
+        axisX = QBarCategoryAxis()
+        axisX.append(categories)
+        axisX.setLabelsAngle(-45)
+        axisX.setTitleText('Variables')
+        axisX.setFont(font)
+        
+        #chart.createDefaultAxes()
+        chart.addAxis(axisX, Qt.AlignBottom)
+        
+
+        axisY = QValueAxis()
+        axisY.setRange(0,100)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        chart.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        # TODO: Y-axis set tick interval 10
+        # TODO: Y-axis horizontal lines
+
+        chart.legend().setVisible(False)
+        chart.legend().setAlignment(Qt.AlignBottom)
+
+        self.widget.setChart(chart) 
