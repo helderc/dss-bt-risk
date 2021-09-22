@@ -90,9 +90,15 @@ class MainWindow(QMainWindow):
         self.bgrpCovS.buttonToggled.connect(self.rdbCovS)
         self.bgrpTPos.buttonToggled.connect(self.rdbTPos)
         
+        self.ckbPofS.stateChanged.connect(self.SetObserve)
         self.ckbAge.stateChanged.connect(self.SetObserve)
+        self.ckbIPR.stateChanged.connect(self.SetObserve)
         self.ckbGender.stateChanged.connect(self.SetObserve)
         self.ckbCovS.stateChanged.connect(self.SetObserve)
+        self.ckbFPR.stateChanged.connect(self.SetObserve)
+        self.ckbFNR.stateChanged.connect(self.SetObserve)
+        self.ckbTPos.stateChanged.connect(self.SetObserve)
+        self.ckbIFR.stateChanged.connect(self.SetObserve)
 
         self.sldrAge.valueChanged.connect(self.AgeSliderChanged)
         self.sldrIFR.valueChanged.connect(self.IFRSliderChanged)
@@ -210,10 +216,30 @@ class MainWindow(QMainWindow):
               '<b><u>Warning level</u></b>: <i><font color="red">Low</font></i>.<br>' +\
               '<b><u>Specification</u></b>: The risk of false-positive ' +\
               'outcomes in testing is moderately <i><font color="red">low</font></i>.'
+        
         #print(txt)
-        txt_reasoning = '<u>Reasoning</u>:<br>' +\
-                        'P(TPos = yes IF<br>&nbsp;&nbsp;' +\
-                        'CovS = Not Infected) = <i><font color="red">14.46%</b></font></i>.'
+
+
+        txt_reasoning = '<u>Reasoning</u>:<br>P('
+        
+        for obs in self.var_observe:
+            #print('obs:', obs)
+            txt_reasoning += obs + ', '
+        txt_reasoning = txt_reasoning[:-2]
+
+        txt_reasoning += ' IF<br>&nbsp;&nbsp;'
+        
+        for evk in self.var_evidences:
+            #print('ev:', ev)
+            txt_reasoning += evk + '=' + str(self.var_evidences[evk]) + ', '
+        # removing last ', '
+        txt_reasoning = txt_reasoning[:-2]
+
+        txt_reasoning += ') = '
+
+        #print(txt_reasoning)
+        # + 'TPos = yes IF<br>&nbsp;&nbsp;' +\
+        #                'CovS = Not Infected) = <i><font color="red">14.46%</b></font></i>.'
         txt_final = txt2 + '<hr>' + txt_reasoning + txt
         self.txtEdtReport.clear()
         self.txtEdtReport.setHtml(txt_final)
@@ -226,9 +252,10 @@ class MainWindow(QMainWindow):
         res = self.bnet.doInference(self.bnet.bn, 
                                     var_obs=self.var_observe, 
                                     evs=self.var_evidences)
-        #print(res)
+        print('Anayze:', res)
 
         report_str = ''
+        
         for k in res:
             print(k, res[k])
             report_str += '<b><font color="red">' + k +\
@@ -279,10 +306,11 @@ class MainWindow(QMainWindow):
         widget_name = self.sender().objectName()
         var_name = widget_name.split('ckb')[1]
 
-        # if var_name == 'CovS':
-        #     var_name = ''
-
-        # FIX: avoid duplicates
+        # 'TPos' in the BN is called 'Tested Positive'
+        if var_name == 'TPos':
+            var_name = 'Tested Positive'
+        elif var_name == 'CovS':
+            var_name = 'COVID-19 Status'
 
         # add/remove itens from the list as necessary
         if var_name in self.var_observe and state == 0:
