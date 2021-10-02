@@ -45,9 +45,14 @@ class MainWindow(QMainWindow):
         self.btnAnalyze.clicked.connect(self.analyze)
         self.btnReset.clicked.connect(self.reset)
 
+        # Evidences
+        self.sldrAge.valueChanged.connect(self.AgeSliderChanged)
         self.bgrpCovS.buttonToggled.connect(self.rdbCovS)
         self.bgrpTPos.buttonToggled.connect(self.rdbTPos)
+        self.sldrIFR.valueChanged.connect(self.IFRSliderChanged)
+        self.sldrIPR.valueChanged.connect(self.IPRSliderChanged)
         
+        # Variables to be OBSERVED
         self.ckbPofS.stateChanged.connect(self.set_observe)
         self.ckbAge.stateChanged.connect(self.set_observe)
         self.ckbIPR.stateChanged.connect(self.set_observe)
@@ -57,10 +62,6 @@ class MainWindow(QMainWindow):
         self.ckbFNR.stateChanged.connect(self.set_observe)
         self.ckbTPos.stateChanged.connect(self.set_observe)
         self.ckbIFR.stateChanged.connect(self.set_observe)
-
-        self.sldrAge.valueChanged.connect(self.AgeSliderChanged)
-        self.sldrIFR.valueChanged.connect(self.IFRSliderChanged)
-        self.sldrIPR.valueChanged.connect(self.IPRSliderChanged)
 
         self.actionProtocol_1.triggered.connect(self.preDefProtocol1)
         self.actionProtocol_2.triggered.connect(self.preDefProtocol2)
@@ -123,15 +124,12 @@ class MainWindow(QMainWindow):
 
             # unset situation
             lblText = f'Covid-19 Status (CovS): {self.covs_states[idx]}'
-            if 'COVID-19 Status' in self.var_evidences:
-                del self.var_evidences['COVID-19 Status']
-                
             # diff from unset
             if idx != -1:
                 lblText = f'<b>Covid-19 Status (CovS): <font color="red">{self.covs_states[idx]}</font></b>'
-                self.var_evidences['COVID-19 Status'] = idx
 
             self.lblCovS.setText(lblText)
+            self.set_evidence('COVID-19 Status', idx)
 
 
     def rdbTPos(self, btn, checked):
@@ -151,11 +149,10 @@ class MainWindow(QMainWindow):
             lblText = f'Tested Positive (TPos): {self.tpos_states[idx]}'
             if idx != -1:
                 lblText = f'<b>Tested Positive (TPos):<font color="red"> {self.tpos_states[idx]}</font></b>'
-                # TODO: set evidence
-                # self.var_evidences['COVID-19 Status'] = idx
     
             self.lblTPos.setText(lblText)
-        
+            self.set_evidence('Tested Positive', idx)
+
 
     def do_report(self, txt, txt_spec, warning_lvl='') -> None:
         #warning_lvl = 'Low'
@@ -186,37 +183,23 @@ class MainWindow(QMainWindow):
         warning_lvl = ''
         report_str = '<ul>'
         txt_spec = ''
-
         txt_ev = ''
-        for evk in self.var_evidences:
-            print('ev:', evk)
-            txt_ev += '{} = {}, '.format(evk, str(self.var_evidences[evk]))
-        # removing last ', '
-        txt_ev = txt_ev[:-2]
+        
+        if (len(self.var_evidences) != 0):
+            for evk in self.var_evidences:
+                print('ev:', evk)
+                txt_parsed = self.parse_state(evk, self.var_evidences[evk])
+                txt_ev += '{} = {}, '.format(evk, txt_parsed)
+            # removing last ', '
+            txt_ev = txt_ev[:-2]
+        # dict empty
+        else:
+            txt_ev = 'No evidence'
         
         for k in res:
             print('k:', k, res[k])
             for i,v in enumerate(res[k]):
-                if (k == 'PofS'):
-                    i_txt = 'Susc.' if i == 1 else 'Not susc.'
-                elif (k == 'Age'):
-                    i_txt = self.age_states[i][0]
-                elif (k == 'IPR'):
-                    i_txt = self.ipr_states[i][0]
-                elif (k == 'Gender'):
-                    i_txt = 'Female' if i == 1 else 'Male'
-                elif (k == 'COVID-19 Status'):
-                    i_txt = self.covs_states[i]
-                elif (k == 'FPR'):
-                    i_txt = self.fpr_states[i]
-                elif (k == 'FNR'):
-                    i_txt = self.fnr_states[i]
-                elif (k == 'Tested Positive'):
-                    i_txt = 'Yes' if i == 1 else 'No'
-                elif (k == 'IFR'):
-                    i_txt = self.ifr_states[i][0]
-                else:
-                    i_txt = ''
+                i_txt = self.parse_state(k, i)
                 report_str += '<li>P(<b>{} = {}</b> | <b>{}</b>) = {:.2f}.</li>'.format(k, i_txt, txt_ev, v)
 
             # Protocol #1:
@@ -246,7 +229,7 @@ class MainWindow(QMainWindow):
                 txt_spec = 'The risk of a subject been infected with or without ' +\
                     'symptoms is <i><font color="red"><b>Low</b></font></i> ' +\
                     'considering a negative test and a ' +\
-                    '<i><font color="red"><b>Low</b></font> ' +\
+                    '<i><font color="red"><b>Low</b></font></i> ' +\
                     'fatality rate.'
             elif self.protocol == 3:
                 warning_lvl = 'High'
@@ -258,6 +241,30 @@ class MainWindow(QMainWindow):
         
         self.do_report(report_str, txt_spec, warning_lvl=warning_lvl)
 
+
+    def parse_state(self, node:str, state:int):
+        if (node == 'PofS'):
+            txt_state = self.pofs_states[state]
+        elif (node == 'Age'):
+            txt_state = self.age_states[state][0]
+        elif (node == 'IPR'):
+            txt_state = self.ipr_states[state][0]
+        elif (node == 'Gender'):
+            txt_state = self.gender_states[state] 
+        elif (node == 'COVID-19 Status'):
+            txt_state = self.covs_states[state]
+        elif (node == 'FPR'):
+            txt_state = self.fpr_states[state]
+        elif (node == 'FNR'):
+            txt_state = self.fnr_states[state]
+        elif (node == 'Tested Positive'):
+            txt_state = self.tpos_states[state]
+        elif (node == 'IFR'):
+            txt_state = self.ifr_states[state][0]
+        else:
+            txt_state = 'Not found!'
+            
+        return txt_state
 
     def plotAge(self, widget_area, evs={}):
 
@@ -383,40 +390,54 @@ class MainWindow(QMainWindow):
         # remove from dict:
         # self.var_evidences.pop('Age')
 
+
+    def set_evidence(self, node:str, state:int):
+            
+        # unset situation
+        if node in self.var_evidences:
+            del self.var_evidences[node]
+        # diff from unset
+        if state != -1:
+            self.var_evidences[node] = state
+
+        print('Evs:', self.var_evidences)
     
 
-    def AgeSliderChanged(self, v):
-        lblText = f'Age: {self.age_states[v][0]}'
-        if v != -1:
+    def AgeSliderChanged(self, idx):
+        lblText = f'Age: {self.age_states[idx][0]}'
+        if idx != -1:
             lblText = '<b>Age: <font color="red">{} ({:.1f}%, {} people)</font></b>'.format(
-                                                                self.age_states[v][0], 
-                                                                self.age_states[v][1]/3711*100,
-                                                                self.age_states[v][1])
+                                                                self.age_states[idx][0], 
+                                                                self.age_states[idx][1]/3711*100,
+                                                                self.age_states[idx][1])
         self.lblAge.setText(lblText)
+        self.set_evidence('Age', idx)
 
 
-    def IFRSliderChanged(self, v):
-        lblText = f'Infection Fatality Rate (IFR): {self.ifr_states[v][0]}'
-        if v != -1:
-            qtt_fatality = int(self.ifr_states[v][1] * self.total_population)
+    def IFRSliderChanged(self, idx):
+        lblText = f'Infection Fatality Rate (IFR): {self.ifr_states[idx][0]}'
+        if idx != -1:
+            qtt_fatality = int(self.ifr_states[idx][1] * self.total_population)
             lblText = '<b>Infection Fatality Rate (IFR):<font color="red"> ' +\
                       '{}, {:d} people</font></b>'.format(
-                                                        self.ifr_states[v][0],
+                                                        self.ifr_states[idx][0],
                                                         qtt_fatality)
         self.lblIFR.setText(lblText)
+        self.set_evidence('IFR', idx)
         
 
-    def IPRSliderChanged(self, v):
-        lblText = f'Infection Prevalence Rate (IPR): {self.ipr_states[v][0]}'
-        if v != -1:
-            qtt_infected = int(self.ipr_states[v][1] * self.total_population)
+    def IPRSliderChanged(self, idx):
+        lblText = f'Infection Prevalence Rate (IPR): {self.ipr_states[idx][0]}'
+        if idx != -1:
+            qtt_infected = int(self.ipr_states[idx][1] * self.total_population)
             
             lblText = '<b>Infection Prevalence Rate (IPR):<font color="red">' +\
                       ' {}, {:d} people</font></b>'.format(
-                                                        self.ipr_states[v][0], 
+                                                        self.ipr_states[idx][0], 
                                                         qtt_infected)
 
         self.lblIPR.setText(lblText)
+        self.set_evidence('IPR', idx)
 
 
     def NotAvailable(self):
