@@ -34,18 +34,23 @@ class BayesianNet(object):
         self.bn = self.createBN()
         self.populatingCPTs(self.bn)
 
+        print('--> BN created!')
+
         #gnb.showInference(self.bn, size='45')
+        
 
     def norm_dist(self, x, mean, std_dev):
         dist = norm.pdf(x, loc=mean, scale=std_dev, random_state=self.r_seed)
         dist = dist / np.sum(dist)
         return dist
 
+
     def tnorm_dist(self, mean, std_dev, bins=None, size=100000):
         '''TNormal as Fenton's book p.279'''
         d = norm.rvs(size=size, loc=mean, scale=std_dev, random_state=self.r_seed)
         hist,bins = np.histogram(d, bins=bins, density=True, range=(0,1))
         return (hist,bins)
+
 
     def data_initialization(self):
         # COVID-19 test accuracy (from Neils paper Table 1)
@@ -79,22 +84,22 @@ class BayesianNet(object):
         self.NI = 712
         self.NP = 3711
         IPR = self.NI/self.NP
-        print('IPR: %.4f' % (IPR))
-        print('IPR considered as 0.2 (20%) for calculations in the paper')
+        # print('IPR: %.4f' % (IPR))
+        # IPR considered as 0.2 (20%) for calculations in the paper
         IPR = 0.2
 
         # PTR (based on Neil's paper)
         # P = IPR x (1-FNR) + (1-IPR) x FPR.
-        print('P = IPR x (1-FNR) + (1-IPR) x FPR = %.4f' % (IPR * (1-df_stats['FNR']['Mean']) + (1-IPR) * df_stats['FPR']['Mean']))
+        #print('P = IPR x (1-FNR) + (1-IPR) x FPR = %.4f' % (IPR * (1-df_stats['FNR']['Mean']) + (1-IPR) * df_stats['FPR']['Mean']))
 
         # JIID's report, 2020
         n_symp = [0, 2, 25, 27, 19, 28, 76, 95, 27, 2]
         n_asymp = [1, 3, 3, 7, 8, 31, 101, 139, 25, 0]
-        print('Infected w/ symptoms: %.4f' % (np.sum(n_symp)/3711))
-        print('Infected w/o symptoms: %.4f' % (np.sum(n_asymp)/3711))
+        #print('Infected w/ symptoms: %.4f' % (np.sum(n_symp)/3711))
+        #print('Infected w/o symptoms: %.4f' % (np.sum(n_asymp)/3711))
 
         # Diamond Princess: 14 deaths (0.3776%) (JIID)
-        print('Deaths: 14 (JIID), %.4f%%' % (14/self.NP*100))
+        #print('Deaths: 14 (JIID), %.4f%%' % (14/self.NP*100))
 
 
     def createBN(self):
