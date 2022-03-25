@@ -105,6 +105,15 @@ class MainWindow(QMainWindow):
         self.var_evidences = {}
         self.protocol = -1
 
+    def update_plots(self):
+        # loop trhough all variables
+
+        # get the values and put as list
+
+        # send to respective plot function
+
+        pass
+
         
     def rdbCovS(self, btn, checked):
         if checked:
@@ -200,6 +209,7 @@ class MainWindow(QMainWindow):
             print('k:', k, res[k])
             for i,v in enumerate(res[k]):
                 i_txt = self.parse_state(k, i)
+                # FIX: if '>=' or '<=' remove the '=' symbol
                 report_str += '<li>P(<b>{} = {}</b> | <b>{}</b>) = {:.2f}.</li>'.format(k, i_txt, txt_ev, v)
 
             # Protocol #1:
@@ -454,8 +464,7 @@ class MainWindow(QMainWindow):
         QMessageBox.aboutQt(self)
 
     def Exit(self):
-        # QtWidgets.qApp.quit
-        self.close()
+       self.close()
 
 
 def main():

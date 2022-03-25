@@ -39,18 +39,29 @@ class CustomTab(QChartView):
             #data = [16, 23, 347, 428, 334, 398, 923, 1015, 216, 11]
             data = [0.0043, 0.0062, 0.0933, 0.1151, 0.0898,
                     0.1071, 0.2490, 0.2740, 0.0581, 0.0029]
-
             chart = AgeGraph(data_values=data)
         elif tab_name == 'Gender':
-            return
+            data = [0.45, 0.55]
+            chart = GenderGraph(data_values=data)
         elif tab_name == 'PofS':
-            return
+            data = [0.54, 0.46]
+            chart = PofSGraph(data_values=data)
         elif tab_name == 'IPR':
-            return
+            data = [0.00000000, 0.00003596, 0.01018150, 0.00278046, 
+                    0.01126105, 0.02618763, 0.89844829, 0.02624331,
+                    0.01132949, 0.00276422, 0.01073674, 0.00002783, 
+                    0.00000347]
+            chart = IPRGraph(data_values=data)
         elif tab_name == 'FNR':
-            return
+            data = [0.000, 0.000, 0.000, 0.001, 0.00037, 0.00549, 0.02719,
+                0.08864, 0.18668, 0.25495, 0.23243, 0.13685, 0.05174,
+                0.01264, 0.00245]
+            chart = FNRGraph(data_values=data)
         elif tab_name == 'FPR':
-            return
+            data = [0.0000e+00, 1.5000e-04, 3.0700e-03, 3.0730e-02, 
+                1.4692e-01, 3.1922e-01, 3.1805e-01, 1.4792e-01, 3.0510e-02, 
+                3.2700e-03, 1.5000e-04, 1.0000e-05]
+            chart = FPRGraph(data_values=data)
         elif tab_name == 'CovS':
             return
         elif tab_name == 'TPos':
@@ -122,9 +133,16 @@ class BaseGraph(QChart):
     
         self.label_lst = [] 
 
+        font = QFont()
+        font.setPixelSize(16)
+        font.setBold(True)
+
+        self.setTitleFont(font)
+        self.setAnimationOptions(QChart.SeriesAnimations)
+
     def MouseOnBar(self, status, index, barset):
         if status:
-            txt = '{}, {:.1f}%'.format(self.label_lst[index],barset[index])
+            txt = '{}, {:.1f}%'.format(self.label_lst[index], barset[index])
             #self.statusbar.showMessage(txt)
             self.setToolTip(txt)
 
@@ -211,18 +229,11 @@ class AgeGraph(BaseGraph):
 
         self.addSeries(series)
         self.setTitle('Age')
-
-        font = QFont()
-        font.setPixelSize(16)
-        font.setBold(True)
-
-        self.setTitleFont(font)
-        self.setAnimationOptions(QChart.SeriesAnimations)
         
         axisX = QBarCategoryAxis()
         axisX.append(self.label_lst)
         #axisX.setLabelsAngle(-45)
-        axisX.setTitleText('Variables')
+        axisX.setTitleText('Age Group')
         
         self.addAxis(axisX, Qt.AlignBottom)
         
@@ -242,6 +253,233 @@ class AgeGraph(BaseGraph):
         self.legend().setVisible(False)
         self.legend().setAlignment(Qt.AlignBottom)
         
+
+class GenderGraph(BaseGraph):
+    def __init__(self, data_values) -> None:
+        super().__init__()
+
+        # used in the tooltips and X-labels
+        self.label_lst = ['Male', 'Female']
+        self.colors = ['#8BD1E7', '#E5B4CD']
+        
+        series = QPercentBarSeries()
+        series.hovered.connect(self.MouseOnBar)
+
+        #setI = QBarSet('age')
+        #setI.setColor(QColor(self.colors[3]))
+        for k,s in enumerate(data_values):
+            print('k', k)
+            setI = QBarSet('{}'.format(self.label_lst[k]))
+            setI.setColor(QColor(self.colors[k]))
+            #values = s/3711 * 100
+            v = s * 100
+            #print(k, values)
+            setI.append(v)
+            series.append(setI)        
+
+        self.addSeries(series)
+        self.setTitle('Gender')
+
+
+        
+        axisY = QValueAxis()
+        axisY.setRange(0,100)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        self.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        self.legend().setVisible(True)
+        self.legend().setAlignment(Qt.AlignBottom)
+
+
+class PofSGraph(BaseGraph):
+    def __init__(self, data_values) -> None:
+        super().__init__()
+
+        # used in the tooltips and X-labels
+        self.label_lst = ['Not Susc.', 'Susc.']
+        self.colors = ['#8BD1E7', '#E5B4CD']
+        
+        series = QPercentBarSeries()
+        series.hovered.connect(self.MouseOnBar)
+
+        #setI = QBarSet('age')
+        #setI.setColor(QColor(self.colors[3]))
+        for k,s in enumerate(data_values):
+            print('k', k)
+            setI = QBarSet('{}'.format(self.label_lst[k]))
+            setI.setColor(QColor(self.colors[k]))
+            #values = s/3711 * 100
+            v = s * 100
+            #print(k, values)
+            setI.append(v)
+            series.append(setI)        
+
+        self.addSeries(series)
+        self.setTitle('Proportion of Susceptible')
+
+
+        
+        axisY = QValueAxis()
+        axisY.setRange(0,100)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        self.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        self.legend().setVisible(True)
+        self.legend().setAlignment(Qt.AlignBottom)
+
+
+class IPRGraph(BaseGraph):
+    def __init__(self, data_values) -> None:
+        super().__init__()
+
+        # used in the tooltips and X-labels
+        self.label_lst = ['\u2264 13%', '14%', '15%', '16%', '17%', '18%', 
+                    '19%', '20%', '21%', '22%', '23%', '24%', '\u2265 25%']
+        
+        series = QBarSeries()
+        series.hovered.connect(self.MouseOnBar)
+
+        setI = QBarSet('age')
+        setI.setColor(QColor(self.colors[3]))
+        for k,s in enumerate(data_values):
+            #values = s/3711 * 100
+            v = s * 100
+            #print(k, values)
+            setI.append(v)
+        series.append(setI)        
+
+        self.addSeries(series)
+        self.setTitle('Infection Prevalence Rate (IPR)')
+        
+        axisX = QBarCategoryAxis()
+        axisX.append(self.label_lst)
+        #axisX.setLabelsAngle(-45)
+        #axisX.setTitleText('Age Group')
+        
+        self.addAxis(axisX, Qt.AlignBottom)
+        
+        axisY = QValueAxis()
+        axisY.setRange(0,100)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        self.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        # TODO: Y-axis set tick interval 10
+        # TODO: Y-axis horizontal lines
+
+        self.legend().setVisible(False)
+        self.legend().setAlignment(Qt.AlignBottom)
+
+
+
+class FNRGraph(BaseGraph):
+    def __init__(self, data_values) -> None:
+        super().__init__()
+
+        # used in the tooltips and X-labels
+        self.label_lst = ['1%', '2%', '3%', '4%', '5%', '6%', '7%', '8%', 
+                    '9%', '10%', '11%', '12%', '13%', '14%', '15%']
+        
+        series = QBarSeries()
+        series.hovered.connect(self.MouseOnBar)
+
+        setI = QBarSet('age')
+        setI.setColor(QColor(self.colors[3]))
+        for k,s in enumerate(data_values):
+            #values = s/3711 * 100
+            v = s * 100
+            #print(k, values)
+            setI.append(v)
+        series.append(setI)        
+
+        self.addSeries(series)
+        self.setTitle('False Negative Rate (FNR)')
+        
+        axisX = QBarCategoryAxis()
+        axisX.append(self.label_lst)
+        #axisX.setLabelsAngle(-45)
+        #axisX.setTitleText('Age Group')
+        
+        self.addAxis(axisX, Qt.AlignBottom)
+        
+        axisY = QValueAxis()
+        axisY.setRange(0,30)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        self.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        # TODO: Y-axis set tick interval 10
+        # TODO: Y-axis horizontal lines
+
+        self.legend().setVisible(False)
+        self.legend().setAlignment(Qt.AlignBottom)
+
+
+class FPRGraph(BaseGraph):
+    def __init__(self, data_values) -> None:
+        super().__init__()
+
+        # used in the tooltips and X-labels
+        self.label_lst = ['0.25%', '0.50%', '0.75%', '1.00%', '1.25%', '1.50%',
+                    '1.75%', '2.00%', '2.25%', '2.50%', '2.75%', '3.00%']
+        
+        series = QBarSeries()
+        series.hovered.connect(self.MouseOnBar)
+
+        setI = QBarSet('age')
+        setI.setColor(QColor(self.colors[3]))
+        for k,s in enumerate(data_values):
+            #values = s/3711 * 100
+            v = s * 100
+            #print(k, values)
+            setI.append(v)
+        series.append(setI)        
+
+        self.addSeries(series)
+        self.setTitle('False Positive Rate (FPR)')
+        
+        axisX = QBarCategoryAxis()
+        axisX.append(self.label_lst)
+        #axisX.setLabelsAngle(-45)
+        #axisX.setTitleText('Age Group')
+        
+        self.addAxis(axisX, Qt.AlignBottom)
+        
+        axisY = QValueAxis()
+        axisY.setRange(0,35)
+        axisY.setTickCount(11)
+        axisY.setLabelFormat('%d')
+        axisY.setTickType(QValueAxis.TicksFixed)
+        axisY.setTitleText('Percentage')
+
+        self.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisY)
+
+        # TODO: Y-axis set tick interval 10
+        # TODO: Y-axis horizontal lines
+
+        self.legend().setVisible(False)
+        self.legend().setAlignment(Qt.AlignBottom)
+
+
 
 class TPosGraph(BaseGraph):
     def __init__(self, data_values) -> None:
