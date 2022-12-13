@@ -1,7 +1,7 @@
 # DSS BT-Risk
 
 This is a proof-of-concept (PofC) graphical user interface (using the PyQt library) for a decision suport system.
-Under the hood it is running the Bayesian network ((using the PyAgrum library)) presented in the publication [1].
+Under the hood it is running the Bayesian network (using the PyAgrum library) presented in the publication [1].
 
 **Since it is a PofC, Several functionalities are missing!**
 
