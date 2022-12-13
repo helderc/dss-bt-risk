@@ -5,13 +5,12 @@ Under the hood it is running the Bayesian network (using the PyAgrum library) pr
 
 **Since it is a PofC, Several functionalities are missing!**
 
-
 ## Screenshot
 ![DSS BT-Risk](dss-bt-risk-screenshot.jpg)
 
-
 ## Publication
 
-[1] H. C. R. Oliveira, V. Shmerko and S. N. Yanushkevich, "Decision Support for Infection Outbreak Analysis: the case of the Diamond Princess cruise ship," *2021 IEEE Symposium Series on Computational Intelligence* (SSCI), 2021, pp. 1-8, doi: [10.1109/SSCI50451.2021.9660140](https://ieeexplore.ieee.org/document/9660140).
+> H. C. R. Oliveira, V. Shmerko and S. N. Yanushkevich, "Decision Support for Infection Outbreak Analysis: the case of the Diamond Princess cruise ship," **2021 IEEE Symposium Series on Computational Intelligence (SSCI 2021)**, 2021, pp. 1-8, doi: [10.1109/SSCI50451.2021.9660140](https://ieeexplore.ieee.org/document/9660140).
 
 ## Code
+The DOI for this repository is: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7434188.svg)](https://doi.org/10.5281/zenodo.7434188)
